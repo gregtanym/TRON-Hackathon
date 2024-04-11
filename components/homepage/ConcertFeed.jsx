@@ -2,7 +2,7 @@
 
 const ConcertFeed = () => {
   return(
-    <div>
+    <div className="bg-red-500">
         ConcertFeed
     </div>
   )
