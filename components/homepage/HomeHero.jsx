@@ -1,4 +1,3 @@
-"use client";
 import HomeSearchBar from "./HomeSearchBar";
 
 const HomeHero = () => {
