@@ -33,4 +33,9 @@
   }
 }
 
+.hero-image {
+  background-image: url('/images/hero-concert.jpg');
+  background-size: cover;
+  background-position: center;
+}
 
