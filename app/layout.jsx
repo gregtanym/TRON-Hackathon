@@ -34,12 +34,9 @@ const RootLayout = ({ children }) => {
 
   return (
     <html lang="en">
-      <body>
+      <body className="">
         <AppProvider>
             <div className="main">
-                {/* <WalletProvider onError={onError} adapters={adapters}>
-                    <WalletModalProvider>{<Nav/>}</WalletModalProvider>
-                </WalletProvider> */}
                 <Nav/>
                 {children}
             </div>

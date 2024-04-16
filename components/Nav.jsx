@@ -85,7 +85,7 @@ const Nav = () => {
                         </Link>
                     </ul>
                 </nav>
-                <button className={`${readyState=='Disconnected' ? "bg-yellow-300 hover:bg-yellow-400 text-black" :"text-yellow-300 bg-gray-700 cursor-default"} px-4 py-2 rounded font-semibold  `} onClick={() => adapter.connect()}>
+                <button className={`${readyState=='Disconnected' ? "bg-yellow-300 hover:bg-yellow-400 text-black" :"text-yellow-300 bg-gray-700 cursor-default"} px-4 py-2 rounded font-semibold`} onClick={() => adapter.connect()}>
                     {readyState=="Disconnected" ? "Connect Wallet": "Connected!"}
                 </button>
             </div>
