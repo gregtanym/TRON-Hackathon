@@ -12,6 +12,8 @@ const AppProvider = (({children}) => {
     const [network, setNetwork] = useState({});
     const adapter = useMemo(() => new TronLinkAdapter(), []);
 
+    const [isLoading, setIsLoading] = useState(false)
+
     const HttpProvider = TronWeb.providers.HttpProvider;
     const fullNode = new HttpProvider("https://nile.trongrid.io");
     const solidityNode = new HttpProvider("https://nile.trongrid.io");
@@ -49,19 +51,19 @@ const AppProvider = (({children}) => {
     // WRITE FUNCTIONS (NFT CONTRACT)
 
     const mintTicket = async (categoryId, quantity, fee) => {
-        // i should implement a loading screen
-        console.log(await tronWeb.trx.getAccount("TLFZtc8QsaHsCkWadhQZ8NW9NVCtnMVQGk"))
         console.log(categoryId, quantity, fee)
         try {
             const contract = await tronWeb.contract().at(process.env.NEXT_PUBLIC_TAYLOR_CONTRACT_ADDRESS)
             const result = await contract.mintTicket(categoryId, quantity).send({
                 feeLimit: 1000000000,
-                callValue: fee,
+                callValue: fee * quantity,
                 shouldPollResponse: true
             })
             console.log(result)
+            return {success: true, result}
         } catch (error) {
-            console.log(error)
+            console.log("Error minting ticket: ", error)
+            return { success: false, error }
         }
         
     }
@@ -79,12 +81,19 @@ const AppProvider = (({children}) => {
         }
     }
 
+    const decodeHexString = (hexString) => {
+        const data = hexString.slice(8); // Remove the function selector
+        const decodedString = tronWeb.toUtf8(data);
+        const strippedString = decodedString.replace(/[\u0000-\u001F]+/g, ''); // Remove null padding
+        return strippedString.trim(); // Additionally, trim any whitespace from both ends of the string
+    }
+
     return(
         <AppContext.Provider value={{
-            adapter, readyState, account, network,
-            setReadyState, setAccount, setNetwork,
+            adapter, readyState, account, network,isLoading,
+            setReadyState, setAccount, setNetwork,setIsLoading,
             tronWeb, 
-            getOwnedTokenIds, mintTicket, isTronLinkConnected, getCatPrices
+            getOwnedTokenIds, mintTicket, isTronLinkConnected, getCatPrices, decodeHexString
         }}>
             {children}
         </AppContext.Provider>

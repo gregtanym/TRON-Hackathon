@@ -9,10 +9,11 @@ import { LuPlusCircle } from "react-icons/lu";
 import { LuMinusCircle } from "react-icons/lu";
 import { useState } from "react";
 import { useGlobalContext } from "@/app/Context/store";
+import Loading from "@/components/Loading";
 
 const EventPurchase = ({ params }) => {
 
-  const {tronWeb, mintTicket, isTronLinkConnected, getCatPrices, getOwnedTokenIds} = useGlobalContext()
+  const {decodeHexString, isLoading, setIsLoading, mintTicket, isTronLinkConnected, getCatPrices, } = useGlobalContext()
 
 
   const [selectedCategory, setSelectedCategory] = useState(1) // actual cat index is different from the selected categoryyyyy
@@ -41,22 +42,35 @@ const EventPurchase = ({ params }) => {
   }
 
   const handlePurchase = async () => {
+    setIsLoading(true)
     if (!isTronLinkConnected()) {
       alert("Please connect your TronLink Wallet before purchasing a ticket!")
+      setIsLoading(false)
       return
     }
 
-    console.log("current state information: ", selectedCategory, selectedQuantity)
+    const selectedCatIndex = selectedCategory - 1
 
-    const ticketPrice = await getCatPrices(selectedCategory)
+    console.log("current state information: ", selectedCatIndex, selectedQuantity)
+    try {
+      const ticketPrice = await getCatPrices(selectedCatIndex)
+      const {success, error} = await mintTicket(selectedCatIndex, selectedQuantity, ticketPrice)
 
-    mintTicket(selectedCategory, selectedQuantity, ticketPrice)
+      if (!success){
+        throw new Error(decodeHexString(error.output.contractResult[0]))
+      }
 
-    // getOwnedTokenIds("TBdrdFZbUHCVGuATyDCmSmU6Eop9C94d7Y")
+      alert("Minting of NFT ticket successful!")
+    } catch (err) {
+      alert(`Error during transaction: ${err.message}`);
+    } finally {
+      setIsLoading(false)
+    }
   }
   
   return (
     <div className="h-full w-full flex flex-col items-center justify-start py-10 bg-gray-200">
+      {isLoading && <Loading/>}
       <div className="max-w-1/2 flex flex-col items-center justify-center bg-white rounded-md p-7 shadow-lg">
         <img src={event.img} className="h-[400px] w-[800px] rounded-md"/>
         <div className="flex flex-col justify-start items-stretch w-[800px]">
