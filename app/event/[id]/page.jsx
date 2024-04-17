@@ -7,23 +7,26 @@ import ConcertCard from "@/components/homepage/ConcertCard";
 import { IoTicketOutline } from "react-icons/io5";
 import { LuPlusCircle } from "react-icons/lu";
 import { LuMinusCircle } from "react-icons/lu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGlobalContext } from "@/app/Context/store";
 import Loading from "@/components/Loading";
 
 const EventPurchase = ({ params }) => {
 
-  const {decodeHexString, isLoading, setIsLoading, mintTicket, isTronLinkConnected, getCatPrices, } = useGlobalContext()
+  const {decodeHexString, isLoading, setIsLoading, mintTicket, isTronLinkConnected, getCatPrices, getMintLimit} = useGlobalContext()
 
 
   const [selectedCategory, setSelectedCategory] = useState(1) // actual cat index is different from the selected categoryyyyy
   const [selectedQuantity, setSelectedQuantity] = useState(1)
+  const [eventMintLimit, setEventMintLimit] = useState(null);
   const eventId = params.id
   const event = eventData.find(event => event.id === eventId)
+  
+  useEffect(() => {
+    getMintLimit().then(setEventMintLimit);
+  }, []);
 
-  // query the blockchain to get the user's current mint limit
-  // i need to get the mint limit and then subtract from the mintCountPerAddress(user address)
-  const mintLimit = 10;
+  console.log("mint limit: ", eventMintLimit)
 
   const incrementCat = () => {
     setSelectedCategory(prevCount => prevCount + 1)
@@ -113,6 +116,7 @@ const EventPurchase = ({ params }) => {
                 {event.pricing.map((price, index) => 
                   <div className="text-sm" key={index}>Cat {index + 1}: <span className="font-semibold">{price} TRX</span></div>
                 )}
+                <div className="text-sm">Mint Limit: <span className="font-semibold">{eventMintLimit} Ticket(s)</span></div>
               </div>
               <div className="flex flex-col items-start mt-2">
                 <div className="font-medium text-lg">Select your Category</div>
@@ -127,7 +131,7 @@ const EventPurchase = ({ params }) => {
                 <div className="flex flex-row justify-evenly items-center w-3/4">
                 <button onClick={decrementQuantity} disabled={selectedQuantity <= 1}><LuMinusCircle className={`${selectedQuantity <= 1 && "text-gray-400"}`}/></button>
                   {selectedQuantity}
-                  <button onClick={incrementQuantity} disabled={selectedQuantity >= mintLimit}><LuPlusCircle className={`${selectedQuantity >= 4 && "text-gray-400"}`}/></button>
+                  <button onClick={incrementQuantity} disabled={selectedQuantity >= eventMintLimit}><LuPlusCircle className={`${selectedQuantity >= eventMintLimit && "text-gray-400"}`}/></button>
                 </div>
               </div>
               <div className="w-3/4 flex justify-center mt-3">

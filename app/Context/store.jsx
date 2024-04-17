@@ -48,6 +48,14 @@ const AppProvider = (({children}) => {
         return decimalPrice
     }
 
+    // const getMintLimit = (contractAddress) => {
+    const getMintLimit = async () => {
+        const contract = await tronWeb.contract().at(process.env.NEXT_PUBLIC_TAYLOR_CONTRACT_ADDRESS)
+        const mintLimit = await contract.mintLimitPerAddress().call()
+        const decimalLimit = tronWeb.toDecimal(mintLimit._hex)
+        return decimalLimit
+    }
+
     // WRITE FUNCTIONS (NFT CONTRACT)
 
     const mintTicket = async (categoryId, quantity, fee) => {
@@ -93,7 +101,7 @@ const AppProvider = (({children}) => {
             adapter, readyState, account, network,isLoading,
             setReadyState, setAccount, setNetwork,setIsLoading,
             tronWeb, 
-            getOwnedTokenIds, mintTicket, isTronLinkConnected, getCatPrices, decodeHexString
+            getOwnedTokenIds, mintTicket, isTronLinkConnected, getCatPrices, decodeHexString, getMintLimit
         }}>
             {children}
         </AppContext.Provider>
