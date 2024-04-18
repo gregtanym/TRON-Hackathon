@@ -20,13 +20,11 @@ const EventPurchase = ({ params }) => {
   const [selectedQuantity, setSelectedQuantity] = useState(1)
   const [eventMintLimit, setEventMintLimit] = useState(null);
   const eventId = params.id
-  const event = eventData.find(event => event.id === eventId)
+  const event = eventData.find(event => event.eventId === eventId)
   
   useEffect(() => {
     getMintLimit().then(setEventMintLimit);
   }, []);
-
-  console.log("mint limit: ", eventMintLimit)
 
   const incrementCat = () => {
     setSelectedCategory(prevCount => prevCount + 1)
@@ -75,10 +73,10 @@ const EventPurchase = ({ params }) => {
     <div className="h-full w-full flex flex-col items-center justify-start py-10 bg-gray-200">
       {isLoading && <Loading/>}
       <div className="max-w-1/2 flex flex-col items-center justify-center bg-white rounded-md p-7 shadow-lg">
-        <img src={event.img} className="h-[400px] w-[800px] rounded-md"/>
+        <img src={event.eventImg} className="h-[400px] w-[800px] rounded-md"/>
         <div className="flex flex-col justify-start items-stretch w-[800px]">
           <div className="font-extrabold text-3xl my-5">
-            {event.title}
+            {event.eventTitle}
           </div>
           <div className="flex flex-row justify-between">
             <div className="flex flex-col w-3/4">
@@ -113,7 +111,7 @@ const EventPurchase = ({ params }) => {
                 <div className="mb-1 font-semibold text-xl">
                   Ticket Information
                 </div>
-                {event.pricing.map((price, index) => 
+                {event.catPricing.map((price, index) => 
                   <div className="text-sm" key={index}>Cat {index + 1}: <span className="font-semibold">{price} TRX</span></div>
                 )}
                 <div className="text-sm">Mint Limit: <span className="font-semibold">{eventMintLimit} Ticket(s)</span></div>
@@ -149,7 +147,7 @@ const EventPurchase = ({ params }) => {
             Event Description
           </div>
           <div className="my-0.5 items-center w-full text-sm">
-            {event.description.map((paragraph) => <p key={event.id}>{paragraph}</p>)}
+            {event.description.map((paragraph) => <p key={event.eventId}>{paragraph}</p>)}
           </div>
           <br/>
           <div className="mt-4 mb-1 font-semibold text-xl">

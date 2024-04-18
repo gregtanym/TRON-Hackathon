@@ -1,6 +1,7 @@
 "use client"
 import React, { useContext, useEffect, useState, useRef, useMemo } from "react"
 import { TronLinkAdapter, WalletReadyState } from '@tronweb3/tronwallet-adapters';
+import eventData from '../../data/events.json'
 // import { TronWeb } from "@/tronweb"; // this imports the tronweb library from tronweb.js (not in node_modules)
 const TronWeb = require('../../tronweb')
 
@@ -8,7 +9,7 @@ const AppContext = React.createContext()
 
 const AppProvider = (({children}) => {
     const [readyState, setReadyState] = useState();
-    const [account, setAccount] = useState('');
+    const [account, setAccount] = useState(''); // stores the current account connected
     const [network, setNetwork] = useState({});
     const adapter = useMemo(() => new TronLinkAdapter(), []);
 
@@ -56,6 +57,26 @@ const AppProvider = (({children}) => {
         return decimalLimit
     }
 
+    // function to get all the owned tokens across all event contracts
+    const getAllOwnedTokens = async (userAddress) => {
+        try {
+            console.log("getAllOwnedTokens called: ", userAddress)
+            let allOwnedTokens = {}
+            await Promise.all(eventData.map(async (event) => {
+                console.log(event.eventTitle, event.contractAddress)
+                const contract = await tronWeb.contract().at(event.contractAddress)
+                const ownedTokenIds = await contract.getOwnedTokenIds(userAddress).call()
+                console.log(event.eventTitle, "tickets found: ", await ownedTokenIds)
+                allOwnedTokens[event.contractAddress] = Array.from(await ownedTokenIds)
+            }))
+            return allOwnedTokens
+        } catch (error) {
+            console.error("Error in getAllOwnedTokens: ", error);
+            throw error; // Or return a default value or error code as needed
+        }
+        
+    }
+
     // WRITE FUNCTIONS (NFT CONTRACT)
 
     const mintTicket = async (categoryId, quantity, fee) => {
@@ -101,7 +122,7 @@ const AppProvider = (({children}) => {
             adapter, readyState, account, network,isLoading,
             setReadyState, setAccount, setNetwork,setIsLoading,
             tronWeb, 
-            getOwnedTokenIds, mintTicket, isTronLinkConnected, getCatPrices, decodeHexString, getMintLimit
+            getOwnedTokenIds, mintTicket, isTronLinkConnected, getCatPrices, decodeHexString, getMintLimit, getAllOwnedTokens
         }}>
             {children}
         </AppContext.Provider>

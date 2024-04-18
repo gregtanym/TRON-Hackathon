@@ -26,10 +26,10 @@ const ConcertFeed = () => {
       <div className="flex flex-row justify-between w-full flex-wrap my-4">
         {eventData.map((event) => 
           <ConcertCard
-            key={event.id}
-            eventId={event.id}
-            img={event.img}
-            title={event.title}
+            key={event.eventId}
+            eventId={event.eventId}
+            img={event.eventImg}
+            title={event.eventTitle}
             month={event.month}
             days={event.days}
             location={event.location}

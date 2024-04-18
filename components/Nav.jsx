@@ -31,6 +31,7 @@ const Nav = () => {
         });
 
         adapter.on('accountsChanged', data => {
+            console.log("detected account changed")
             setAccount(data);
         });
 

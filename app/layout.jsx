@@ -1,8 +1,11 @@
+// "use client"
+
 import "@/styles/globals.css";
 import Nav from "@/components/Nav";
 import { AppProvider } from "./Context/store";
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
+import { TronLinkAdapter, WalletReadyState } from '@tronweb3/tronwallet-adapters';
 import { useWallet, WalletProvider } from '@tronweb3/tronwallet-adapter-react-hooks';
 import { WalletModalProvider } from '@tronweb3/tronwallet-adapter-react-ui';
 import { WalletDisconnectedError, WalletError, WalletNotFoundError } from '@tronweb3/tronwallet-abstract-adapter';
@@ -13,34 +16,23 @@ export const metadata = {
 };
 
 const RootLayout = ({ children }) => {
-  // function onError(e) {
-  //     if (e instanceof WalletNotFoundError) {
-  //         // some alert for wallet not found
-  //         console.log("Wallet not found")
-  //     } else if (e instanceof WalletDisconnectedError) {
-  //       // some alert for wallet not connected
-  //       console.log("Wallet not connected")
-  //     } else {
-  //         console.error(e.message);
-  //     }
-  // }
-  // const adapters = useMemo(function () {
-  //     const tronLink = new TronLinkAdapter();
-  //     const ledger = new LedgerAdapter({
-  //         accountNumber: 2,
-  //     });
-  //     return [tronLink, ledger];
+
+  // const adapters = useMemo(() => [new TronLinkAdapter()]);
+  // const onAccountsChanged = useCallback((curAddr, preAddr) => {
+  //     console.log('new address is: ', curAddr, ' previous address is: ', preAddr);
   // }, []);
 
   return (
     <html lang="en">
       <body className="">
-        <AppProvider>
-            <div className="main">
-                <Nav/>
-                {children}
-            </div>
-        </AppProvider>
+        {/* <WalletProvider adapters={adapters} onAccountsChanged={onAccountsChanged}> */}
+          <AppProvider>
+              <div className="main">
+                  <Nav/>
+                  {children}
+              </div>
+          </AppProvider>
+        {/* </WalletProvider> */}
       </body>
     </html>
   );
