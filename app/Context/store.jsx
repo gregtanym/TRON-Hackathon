@@ -67,7 +67,11 @@ const AppProvider = (({children}) => {
                 const contract = await tronWeb.contract().at(event.contractAddress)
                 const ownedTokenIds = await contract.getOwnedTokenIds(userAddress).call()
                 console.log(event.eventTitle, "tickets found: ", await ownedTokenIds)
-                allOwnedTokens[event.contractAddress] = Array.from(await ownedTokenIds)
+
+                // convert the hex to decimal
+                allOwnedTokens[event.contractAddress] = ownedTokenIds.map(tokenId =>
+                    tronWeb.toDecimal(tokenId._hex)
+                );
             }))
             return allOwnedTokens
         } catch (error) {
