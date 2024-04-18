@@ -74,3 +74,7 @@ img.rounded {
   background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
   z-index: 1000; /* Make sure it's on top */
 }
+
+label {
+  margin-left:0.5rem;
+}
