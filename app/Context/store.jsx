@@ -13,6 +13,7 @@ const AppProvider = (({children}) => {
     const [network, setNetwork] = useState({});
     const adapter = useMemo(() => new TronLinkAdapter(), []);
     const [myTickets, setMyTickets] = useState([])
+    const [marketplaceListings, setMarketplaceListings] = useState([])
 
     const [isLoading, setIsLoading] = useState(false)
 
@@ -99,7 +100,6 @@ const AppProvider = (({children}) => {
                 // Combine the tickets from this iteration into the main array
                 allNewTickets = allNewTickets.concat(tempTickets);
             }));
-    
             // Now update the state once with all new tickets
             setMyTickets(allNewTickets);
         } catch (error) {
@@ -136,6 +136,75 @@ const AppProvider = (({children}) => {
     const isEventCanceled = async (contractAddress) => {
         const contract = await tronWeb.contract().at(contractAddress)
         return await contract.eventCanceled().call()
+    }
+
+    // READ FUNCTIONS (MARKETPLACE CONTRACT)
+
+    const getAllActiveListings = async () => {
+        console.log("getAllActiveListings called!");
+        try {
+            const contractAddress = process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS;
+            const contract = await tronWeb.contract().at(contractAddress);
+            const allActiveListingsTmp = await contract.getAllActiveListings2().call();
+    
+            const [ids, sellers, contracts, tokenIds, listingPrices, actives] = allActiveListingsTmp;
+    
+            const allActiveListings = ids.map((id, index) => ({
+                listingId: tronWeb.toDecimal(id._hex),
+                sellerAddress: tronWeb.address.fromHex(sellers[index]),
+                nftContractAddress: tronWeb.address.fromHex(contracts[index]),
+                tokenId: tronWeb.toDecimal(tokenIds[index]),
+                listingPrice: tronWeb.toDecimal(listingPrices[index]),
+                isActive: actives[index],
+            }));
+    
+            // Sort listings by nftContractAddress
+            allActiveListings.sort((a, b) => a.nftContractAddress.localeCompare(b.nftContractAddress));
+            
+            let currentContractInstance = null;
+            let currentContractAddress = "";
+            let event = null
+            let listingsList = []
+    
+            for (const listing of allActiveListings) {
+                if (listing.nftContractAddress !== currentContractAddress) {
+                    currentContractInstance = await tronWeb.contract().at(listing.nftContractAddress);
+                    currentContractAddress = listing.nftContractAddress;
+
+                    event = eventData.find(event => event.contractAddress === currentContractAddress)
+                }
+                const newListingInfo = {
+                    "listingId": listing.listingId,
+                    "sellerAddress": listing.sellerAddress,
+                    "nftContractAddress": currentContractAddress,
+                    "tokenId": listing.tokenId,
+                    "listingPrice": tronWeb.fromSun(listing.listingPrice),
+                    "isActive": listing.isActive,
+
+                    "eventTitle": event.eventTitle,
+                    "date": event.date,
+                    "time": event.time,
+                    "location": event.location, 
+                    "eventDescription": event.description,
+
+                    "isRedeemed": await currentContractInstance.isTicketRedeemed(listing.tokenId).call(),
+                    "isInsured": await currentContractInstance.ticketInsurance(listing.tokenId).call(),
+                    "catClass": parseInt(await currentContractInstance.determineCategoryId(listing.tokenId).call()) + 1,
+                    "tokenImgURL": await currentContractInstance.tokenURI(listing.tokenId).call(),
+                }
+                listingsList.push(newListingInfo)
+            }
+            
+            setMarketplaceListings(listingsList)
+        } catch (error) {
+            console.error('Error fetching listings:', error);
+            throw error;
+        }
+    }
+
+    const isTicketListed = async (nftContractAddress, tokenId) => {
+        const contract = await tronWeb.contract().at(process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS)
+        return await contract.isNFTListed(nftContractAddress, tokenId).call()
     }
 
     // WRITE FUNCTIONS (NFT CONTRACT)
@@ -189,6 +258,20 @@ const AppProvider = (({children}) => {
         }
     }
 
+    // WRITE FUNCTIONS (MARKETPLACE CONTRACT)
+
+    const listNFT = async () => {
+
+    }
+
+    const buyNFT = async () => {
+        
+    }
+
+    const approveNFTContractToMarketplace = async () => {
+
+    }
+
     // UTILITY FUNCTIONS
 
     const isTronLinkConnected = async () => {
@@ -211,11 +294,11 @@ const AppProvider = (({children}) => {
 
     return(
         <AppContext.Provider value={{
-            adapter, readyState, account, network, isLoading, myTickets,
-            setReadyState, setAccount, setNetwork, setIsLoading, setMyTickets,
+            adapter, readyState, account, network, isLoading, myTickets, marketplaceListings, 
+            setReadyState, setAccount, setNetwork, setIsLoading, setMyTickets, setMarketplaceListings,
             tronWeb, 
             isTronLinkConnected,
-            getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens,
+            getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens, getAllActiveListings,
             mintTicket, buyInsurance, redeemTicket,
             decodeHexString,
         }}>

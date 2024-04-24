@@ -7,7 +7,7 @@ const ConcertCard = ({eventId, img, title, month, days, time, location}) => {
 
     const handleClick = () => {
         router.push(`/event/${eventId}`)
-      }
+    }
 
     return(
         <div className="rounded-lg w-80 h-64 flex flex-col my-5 cursor-pointer 
