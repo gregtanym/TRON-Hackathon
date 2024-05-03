@@ -215,7 +215,7 @@ const AppProvider = (({children}) => {
             const result = await contract.mintTicket(categoryId, quantity).send({
                 feeLimit: 1000000000,
                 callValue: fee * quantity,
-                shouldPollResponse: true
+                // shouldPollResponse: true
             })
             console.log(result)
             return {success: true, result}
@@ -232,7 +232,7 @@ const AppProvider = (({children}) => {
             const result = await contract.buyInsurance(tokenId).send({
                 feeLimit: 1000000000,
                 callValue: insurancePrice,
-                shouldPollResponse: true
+                // shouldPollResponse: true
             })
             console.log("buy ticket insurance: ", result)
             return {success: true, result}
@@ -248,7 +248,7 @@ const AppProvider = (({children}) => {
             const result = await contract.redeemTicket(tokenId).send({
                 feeLimit: 1000000000,
                 callValue: 0,
-                shouldPollResponse: true
+                // shouldPollResponse: true
             })
             console.log("redeem ticket: ", result)
             return {success: true, result}
