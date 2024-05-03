@@ -118,3 +118,9 @@ img.rounded {
 label {
   margin-left:0.5rem;
 }
+
+.scrollable-content {
+  max-height: calc(100% - 60px); /* Adjust this value as needed to exclude button height and padding */
+  overflow-y: auto;
+}
+

@@ -76,10 +76,6 @@ const Nav = () => {
                             <li className={`${isActive("/mytickets") ? 'text-white font-semibold' : 'text-gray-300 hover:text-white'} h-full`}>My Tickets</li>
                         
                         </Link>
-                        <Link href="/mylistings">
-                            <li className={`${isActive("/mylistings") ? 'text-white font-semibold' : 'text-gray-300 hover:text-white'} h-full`}>My Listings</li>
-                        
-                        </Link>
                         <Link href="/insurance">
                             <li className={`${isActive("/insurance") ? 'text-white font-semibold' : 'text-gray-300 hover:text-white'} h-full`}>Insurance Claims</li>
                         

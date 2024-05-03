@@ -23,7 +23,11 @@ const EventPurchase = ({ params }) => {
   const event = eventData.find(event => event.eventId === eventId)
   
   useEffect(() => {
-    getMintLimit().then(setEventMintLimit);
+    const getMintLimitPerAddress = async () => {
+      const mintLimt = await getMintLimit(event.contractAddress)
+      setEventMintLimit(mintLimt)
+    }
+    getMintLimitPerAddress()
   }, []);
 
   const incrementCat = () => {
@@ -54,8 +58,8 @@ const EventPurchase = ({ params }) => {
 
     console.log("current state information: ", selectedCatIndex, selectedQuantity)
     try {
-      const ticketPrice = await getCatPrices(selectedCatIndex)
-      const {success, error} = await mintTicket(selectedCatIndex, selectedQuantity, ticketPrice)
+      const ticketPrice = await getCatPrices(selectedCatIndex, event.contractAddress)
+      const {success, error} = await mintTicket(selectedCatIndex, selectedQuantity, ticketPrice, event.contractAddress)
 
       if (!success){
         throw new Error(decodeHexString(error.output.contractResult[0]))
@@ -127,7 +131,7 @@ const EventPurchase = ({ params }) => {
               <div className="flex flex-col items-start mt-2">
                 <div className="font-medium text-lg">Select your Quantity</div>
                 <div className="flex flex-row justify-evenly items-center w-3/4">
-                <button onClick={decrementQuantity} disabled={selectedQuantity <= 1}><LuMinusCircle className={`${selectedQuantity <= 1 && "text-gray-400"}`}/></button>
+                  <button onClick={decrementQuantity} disabled={selectedQuantity <= 1}><LuMinusCircle className={`${selectedQuantity <= 1 && "text-gray-400"}`}/></button>
                   {selectedQuantity}
                   <button onClick={incrementQuantity} disabled={selectedQuantity >= eventMintLimit}><LuPlusCircle className={`${selectedQuantity >= eventMintLimit && "text-gray-400"}`}/></button>
                 </div>
