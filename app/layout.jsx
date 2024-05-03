@@ -38,9 +38,9 @@ const RootLayout = ({ children }) => {
         {/* <WalletProvider adapters={adapters} onAccountsChanged={onAccountsChanged}> */}
         <AppProvider>
           <div className="main">
-            <Nav />
-            <Chat />
+            <Nav/>
             {children}
+            <Chat/>
           </div>
         </AppProvider>
         {/* </WalletProvider> */}

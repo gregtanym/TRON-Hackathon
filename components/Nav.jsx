@@ -56,7 +56,7 @@ const Nav = () => {
     const isActive = (pathname) => pathName === pathname;
 
     return(
-        <div className="w-full bg-gray-800">
+        <div className="w-full bg-gray-800 mb-0">
             <div className="flex items-center justify-between px-4 py-2 h-full">
                 <Link href='/' className="text-yellow-300 font-bold text-2xl">
                     <div className="flex items-center">
