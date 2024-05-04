@@ -34,7 +34,7 @@ const RootLayout = ({ children }) => {
 
   return (
     <html lang="en">
-      <body className="">
+      <body className="mb-20">
         {/* <WalletProvider adapters={adapters} onAccountsChanged={onAccountsChanged}> */}
         <AppProvider>
           <div className="main">

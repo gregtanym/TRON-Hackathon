@@ -56,7 +56,10 @@ const AppProvider = (({children}) => {
     const getAllOwnedTokens = async (userAddress) => {
         try {
             console.log("getAllOwnedTokens called: ", userAddress);
+            setMyTickets([])
             let allNewTickets = []; // Aggregate all tickets here
+
+            const marketplaceContract = await tronWeb.contract().at(process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS)
     
             // Wait for all promises from map to resolve
             await Promise.all(eventData.map(async (event) => {
@@ -76,6 +79,7 @@ const AppProvider = (({children}) => {
                     const catClass = tronWeb.toDecimal(catIndex) + 1;
                     const imageURL = await contract.tokenURI(currentTokenId).call();
                     const isCancelled = await contract.eventCanceled().call();
+                    const isListed = await marketplaceContract.isNFTListed(currentContractAddress, currentTokenId).call()
     
                     const newTicket = {
                         "contractAddress": currentContractAddress, 
@@ -90,9 +94,9 @@ const AppProvider = (({children}) => {
                         "catClass": catClass,
                         "imageURL": imageURL,
                         "isCancelled": isCancelled,
-                        "originalTicketPrice": tronWeb.toSun(event.catPricing[catIndex])
+                        "originalTicketPrice": tronWeb.toSun(event.catPricing[catIndex]),
+                        "isListed": isListed
                     };
-                    // i need a isListed checker
     
                     tempTickets.push(newTicket);
                 }
@@ -146,6 +150,7 @@ const AppProvider = (({children}) => {
             const contractAddress = process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS;
             const contract = await tronWeb.contract().at(contractAddress);
             const allActiveListingsTmp = await contract.getAllActiveListings2().call();
+
     
             const [ids, sellers, contracts, tokenIds, listingPrices, actives] = allActiveListingsTmp;
     
@@ -260,7 +265,20 @@ const AppProvider = (({children}) => {
 
     // WRITE FUNCTIONS (MARKETPLACE CONTRACT)
 
-    const listNFT = async () => {
+    const listTicket = async (contractAddress, tokenId, listedTRXPrice) => {
+        const listedSunPrice = tronWeb.toSun(listedTRXPrice)
+        try {
+            const contract = await tronWeb.contract().at(process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS)
+            const result = await contract.listNFT(contractAddress, tokenId, listedSunPrice).send({
+                feeLimit: 1000000000,
+                callValue: 0, 
+            })
+            console.log("List ticket: ", result)
+            return {success: true, result}
+        } catch (error) {
+            console.log("Error listing ticket: ", error)
+            return { success: false, error }
+        }
 
     }
 
@@ -268,7 +286,19 @@ const AppProvider = (({children}) => {
         
     }
 
-    const approveNFTContractToMarketplace = async () => {
+    const approveNFTContractToMarketplace = async (contractAddress, tokenId) => {
+        try {
+            const contract = await tronWeb.contract().at(contractAddress)
+            const result = await contract.approve(process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS, tokenId).send({
+                feeLimit: 1000000000,
+                callValue: 0, 
+            })
+            console.log("Approve marketplace contract for token: ", result)
+            return {success: true, result}
+        } catch (error) {
+            console.log("Approval error: ", error)
+            return { success: false, error }
+        }
 
     }
 
@@ -292,14 +322,22 @@ const AppProvider = (({children}) => {
         return strippedString.trim(); // Additionally, trim any whitespace from both ends of the string
     }
 
+    const updateTicketStatus = (tokenId, updatedFields) => {
+        setMyTickets(currentTickets => {
+            return currentTickets.map(ticket =>
+            ticket.tokenId === tokenId ? { ...ticket, ...updatedFields } : ticket
+            );
+        });
+    };
+
     return(
         <AppContext.Provider value={{
-            adapter, readyState, account, network, isLoading, myTickets, marketplaceListings, 
+            adapter, readyState, account, network, isLoading, myTickets, marketplaceListings,
             setReadyState, setAccount, setNetwork, setIsLoading, setMyTickets, setMarketplaceListings,
             tronWeb, 
             isTronLinkConnected,
             getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens, getAllActiveListings,
-            mintTicket, buyInsurance, redeemTicket,
+            mintTicket, buyInsurance, redeemTicket, listTicket, updateTicketStatus, approveNFTContractToMarketplace,
             decodeHexString,
         }}>
             {children}

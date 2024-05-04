@@ -1,21 +1,16 @@
 "use client"
 
-import React from 'react'
+import React, { useState } from 'react'
 import { FaRegThumbsUp } from "react-icons/fa";
 import { FaRegThumbsDown } from "react-icons/fa";
 import { useGlobalContext } from '@/app/Context/store';
 import Loading from '../Loading';
+import ListTicketModal from './ListTicketModal';
 
-const TicketCard = ({contractAddress, eventId, title, date, time, location, tokenId, isRedeemed, isInsured, catClass, imageURL, isCancelled, originalTicketPrice}) => {
-    const {isLoading, setIsLoading, buyInsurance, isTronLinkConnected, redeemTicket, decodeHexString, setMyTickets} = useGlobalContext()
+const TicketCard = ({contractAddress, eventId, title, date, time, location, tokenId, isRedeemed, isInsured, catClass, imageURL, isCancelled, originalTicketPrice, isListed}) => {
+    const {isLoading, setIsLoading, buyInsurance, isTronLinkConnected, redeemTicket, decodeHexString, setMyTickets, updateTicketStatus} = useGlobalContext()
+    const [isPopupOpen, setIsPopupOpen] = useState(false); 
 
-    const updateTicketStatus = (tokenId, updatedFields) => {
-        setMyTickets(currentTickets => {
-          return currentTickets.map(ticket =>
-            ticket.tokenId === tokenId ? { ...ticket, ...updatedFields } : ticket
-          );
-        });
-      };
 
     const handleBuyInsurance = async () => {
         setIsLoading(true)
@@ -63,9 +58,19 @@ const TicketCard = ({contractAddress, eventId, title, date, time, location, toke
         }
     }
 
+    const handleCloseModal = () => {   
+      setIsPopupOpen(false)
+    }
 
   return (
     <div className='border-b-2 border-black mx-8 my-2 py-2 flex flex-row w-full'>
+      {isPopupOpen && 
+        <ListTicketModal 
+          tokenId={tokenId}
+          contractAddress={contractAddress}
+          onClose={handleCloseModal} 
+        />
+      }
         <div>
             <img src={imageURL} className='w-40 h-40 rounded-md bg-blue-400' alt='NFT_Image'/>
         </div>
@@ -97,7 +102,9 @@ const TicketCard = ({contractAddress, eventId, title, date, time, location, toke
             <button disabled={isRedeemed} className={`${isRedeemed ? "text-yellow-300 bg-gray-700 cursor-default" :"bg-yellow-300 hover:bg-yellow-400 text-black" } font-semibold text-lg w-28 py-1 rounded-md`} onClick={handleRedeemTicket}>
                 {isRedeemed ? "Redeemed!": "Redeem"}
             </button>
-            <button className='bg-yellow-300 rounded-md font-semibold text-xl w-28 py-1'>List</button>
+            <button disabled={isListed} className={`${isListed ? "text-yellow-300 bg-gray-700 cursor-default" :"bg-yellow-300 hover:bg-yellow-400 text-black" } font-semibold text-lg w-28 py-1 rounded-md`} onClick={() => setIsPopupOpen(true)}>
+                {isListed ? "Listed!": "List"}  
+            </button>
         </div>
     </div>
   )

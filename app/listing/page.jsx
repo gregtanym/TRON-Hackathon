@@ -31,10 +31,6 @@ const ListingPage = () => {
         fetchListings()
     }, [])
 
-    console.log(typeof paramListingId)
-
-    console.log("this is the current marketplace listings: ", marketplaceListings)
-
     const listingDetails = marketplaceListings.find(listing => listing.listingId === parseInt(paramListingId))
 
     console.log("this is the found listing: ", listingDetails)

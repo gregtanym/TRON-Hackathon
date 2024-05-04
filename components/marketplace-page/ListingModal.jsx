@@ -2,13 +2,18 @@ import React from 'react';
 import { RiCoinsLine } from "react-icons/ri";
 import { TbPigMoney } from "react-icons/tb";
 import { MdRedeem } from "react-icons/md";
+import { IoClose } from "react-icons/io5"; 
 
 const ListingModal = ({ isOpen, listing, onClose }) => {
   if (!isOpen) return null;
 
+  const handleModalClick = (event) => {
+    event.stopPropagation();
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20" onClick={onClose}>
-      <div className="bg-white p-5 rounded-lg w-3/4 h-3/4 overflow-y-auto">
+      <div className="bg-white p-5 rounded-lg w-3/4 h-3/4 overflow-y-auto"  onClick={handleModalClick}>
         <div className='flex flex-row justify-between items-start w-full h-auto'>
             <div className='flex flex-col justify-center items-center w-1/2 py-4 px-6 my-6 border-r border-gray-500'>
                 <img src={listing.tokenImgURL} alt="Token" className='w-72 h-72'/>
@@ -34,6 +39,9 @@ const ListingModal = ({ isOpen, listing, onClose }) => {
                     BUY NOW
                 </button>
             </div>
+            <button onClick={onClose} className="text-lg">
+              <IoClose /> {/* Display close icon */}
+            </button>
         </div>
       </div>
     </div>

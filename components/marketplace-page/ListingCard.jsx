@@ -6,9 +6,9 @@ const ListingCard = ({listing}) => {
 
 
   return (
-    <div className='flex shadow-md rounded-md mx-4 mb-4 justify-center items-center p-3 w-2/5'>
+    <div className='flex shadow-md rounded-md mx-4 mb-4 justify-center items-center p-3'>
         <div>
-            <img className='min-w-40 h-40' src={listing.tokenImgURL}/>
+            <img className='min-w-40 h-40 rounded-md mr-3' src={listing.tokenImgURL}/>
         </div>
         <div className='flex flex-col'>
             <div className='font-bold text-lg'>{listing.eventTitle}</div>

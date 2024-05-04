@@ -126,7 +126,7 @@ const Marketplace = () => {
             <div className='w-4/5 flex flex-wrap justify-evenly items-start h-min'>
               {marketplaceListings.map(
                 (listing) => (
-                  <div onClick={() => handleListingClick(listing)} key={listing.listingId} className='w-full cursor-pointer'>
+                  <div onClick={() => handleListingClick(listing)} key={listing.listingId} className='cursor-pointer w-1/2 '>
                     <ListingCard
                       listing={listing}
                     />

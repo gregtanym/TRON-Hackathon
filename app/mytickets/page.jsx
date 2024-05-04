@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react'
 import { useGlobalContext } from '../Context/store'
 import TicketCard from '@/components/mytickets-page/TicketCard'
 import Loading from '@/components/Loading'
+import ListTicketModal from '@/components/mytickets-page/ListTicketModal'
 
 const MyTickets = () => {
 
-  const {account, getAllOwnedTokens, myTickets, isLoading} = useGlobalContext()
-
+  const {account, getAllOwnedTokens, myTickets, isLoading, } = useGlobalContext()
   const [selectedFilter, setSelectedFilter] = useState("Purchased")
 
   const handleFilterChange = (event) => {
@@ -20,7 +20,7 @@ const MyTickets = () => {
       case 'Purchased':
         return true;
       case 'Listed':
-        return false; // Update when listed is implemented
+        return ticket.isListed; // Update when listed is implemented
       case 'Redeemed':
         return ticket.isRedeemed;
       case 'Insured':
@@ -70,24 +70,26 @@ const MyTickets = () => {
         <div className='w-full flex justify-center'>
           {filteredTickets.length === 0 && "No tickets to display :("}
         </div>
-        {filteredTickets.map(event => <TicketCard
-          key={event.eventId}
-          contractAddress= {event.contractAddress}
-          eventId={event.eventId}
-          title={event.eventTitle}
-          date={event.date}
-          time={event.time}
-          location={event.location}
-          tokenId={event.tokenId}
-          isRedeemed={event.isRedeemed}
-          isInsured={event.isInsured}
-          catClass={event.catClass}
-          imageURL={event.imageURL}
-          isCancelled={event.isCancelled}
-          originalTicketPrice = {event.originalTicketPrice}
-        />)}
+        {filteredTickets.map(ticket => 
+          <TicketCard
+            contractAddress= {ticket.contractAddress}
+            eventId={ticket.eventId}
+            title={ticket.eventTitle}
+            date={ticket.date}
+            time={ticket.time}
+            location={ticket.location}
+            tokenId={ticket.tokenId}
+            isRedeemed={ticket.isRedeemed}
+            isInsured={ticket.isInsured}
+            catClass={ticket.catClass}
+            imageURL={ticket.imageURL}
+            isCancelled={ticket.isCancelled}
+            originalTicketPrice = {ticket.originalTicketPrice}
+            isListed = {ticket.isListed}
+          />
+        )}
       </div>
-      </section>
+    </section>
   )
 }
 
