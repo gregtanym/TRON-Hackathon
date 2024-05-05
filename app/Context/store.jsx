@@ -282,8 +282,19 @@ const AppProvider = (({children}) => {
 
     }
 
-    const buyNFT = async () => {
-        
+    const buyTicket = async (listingId, listedPrice) => {
+        try {
+            const contract = await tronWeb.contract().at(process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS)
+            const result = await contract.buyNFT(listingId).send({
+                feeLimit: 1000000000,
+                callValue: tronWeb.toSun(listedPrice), 
+            })
+            console.log("Buy resale ticket: ", result)
+            return {success: true, result}
+        } catch (error) {
+            console.log("Error buying resale ticket: ", error)
+            return { success: false, error }
+        }
     }
 
     const approveNFTContractToMarketplace = async (contractAddress, tokenId) => {
@@ -332,13 +343,12 @@ const AppProvider = (({children}) => {
 
     return(
         <AppContext.Provider value={{
+            tronWeb, 
             adapter, readyState, account, network, isLoading, myTickets, marketplaceListings,
             setReadyState, setAccount, setNetwork, setIsLoading, setMyTickets, setMarketplaceListings,
-            tronWeb, 
-            isTronLinkConnected,
             getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens, getAllActiveListings,
-            mintTicket, buyInsurance, redeemTicket, listTicket, updateTicketStatus, approveNFTContractToMarketplace,
-            decodeHexString,
+            mintTicket, buyInsurance, redeemTicket, listTicket, updateTicketStatus, approveNFTContractToMarketplace, buyTicket,
+            decodeHexString, isTronLinkConnected
         }}>
             {children}
         </AppContext.Provider>

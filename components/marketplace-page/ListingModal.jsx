@@ -1,15 +1,41 @@
+"use client"
+
 import React from 'react';
 import { RiCoinsLine } from "react-icons/ri";
 import { TbPigMoney } from "react-icons/tb";
 import { MdRedeem } from "react-icons/md";
 import { IoClose } from "react-icons/io5"; 
+import { useGlobalContext } from '@/app/Context/store';
 
 const ListingModal = ({ isOpen, listing, onClose }) => {
+  const {buyTicket, isTronLinkConnected, setIsLoading, decodeHexString} = useGlobalContext()
   if (!isOpen) return null;
 
   const handleModalClick = (event) => {
     event.stopPropagation();
   };
+
+  const buyResaleTicket = async () => {
+    setIsLoading(true)
+    if (!isTronLinkConnected()) {
+      alert("Please connect your TronLink Wallet before buying ticket insurance")
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      const {success, error} = await buyTicket(listing.listingId, listing.listingPrice)
+
+      if (!success){
+        throw new Error(decodeHexString(error.output.contractResult[0]))
+      }
+      alert("Ticket Purchased Successfully!")
+    } catch (err) {
+      alert(`Error during transaction: ${err.message}`);
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20" onClick={onClose}>
@@ -35,12 +61,12 @@ const ListingModal = ({ isOpen, listing, onClose }) => {
                 <div className={`flex items-center font-semibold ${listing.isRedeemed ? "text-red-600" : "text-green-600"}`}><MdRedeem/>{listing.isRedeemed ? "Redeemed" : "Redeemable"}</div>
                 <div className={`flex items-center font-semibold ${listing.isInsured ? "text-green-600" : "text-red-600"}`}><TbPigMoney/>{listing.isInsured ? "Insured" : "Uninsured"}</div>
                 <div className='text-green-700 text-2xl font-bold my-3 flex flex-row items-center'><RiCoinsLine/> {listing.listingPrice} TRX</div>
-                <button className="bg-yellow-300 hover:bg-yellow-400 text-black font-bold text-2xl w-48 py-1.5 rounded-md">
+                <button className="bg-yellow-300 hover:bg-yellow-400 text-black font-bold text-2xl w-48 py-1.5 rounded-md" onClick={buyResaleTicket}>
                     BUY NOW
                 </button>
             </div>
             <button onClick={onClose} className="text-lg">
-              <IoClose /> {/* Display close icon */}
+              <IoClose />
             </button>
         </div>
       </div>
