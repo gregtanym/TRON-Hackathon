@@ -123,7 +123,7 @@ const Marketplace = () => {
                 </button>
               </form>
             </div>
-            <div className='w-4/5 flex flex-wrap justify-evenly items-start h-min'>
+            <div className='w-4/5 flex flex-wrap justify-evenly items-start h-min px-4'>
               {marketplaceListings.map(
                 (listing) => (
                   <div onClick={() => handleListingClick(listing)} key={listing.listingId} className='cursor-pointer w-1/2 '>
