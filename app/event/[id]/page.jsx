@@ -9,16 +9,19 @@ import { LuPlusCircle } from "react-icons/lu";
 import { LuMinusCircle } from "react-icons/lu";
 import { useState, useEffect } from "react";
 import { useGlobalContext } from "@/app/Context/store";
+import { FaRegThumbsUp } from "react-icons/fa";
+import { FaRegThumbsDown } from "react-icons/fa";
 import Loading from "@/components/Loading";
 
 const EventPurchase = ({ params }) => {
 
-  const {decodeHexString, isLoading, setIsLoading, mintTicket, isTronLinkConnected, getCatPrices, getMintLimit} = useGlobalContext()
+  const {decodeHexString, isLoading, setIsLoading, mintTicket, isTronLinkConnected, getCatPrices, getMintLimit, isEventCanceled} = useGlobalContext()
 
 
   const [selectedCategory, setSelectedCategory] = useState(1) // actual cat index is different from the selected categoryyyyy
   const [selectedQuantity, setSelectedQuantity] = useState(1)
   const [eventMintLimit, setEventMintLimit] = useState(null);
+  const [isCancelled, setIsCancelled] = useState(null);
   const eventId = params.id
   const event = eventData.find(event => event.eventId === eventId)
   
@@ -27,7 +30,13 @@ const EventPurchase = ({ params }) => {
       const mintLimt = await getMintLimit(event.contractAddress)
       setEventMintLimit(mintLimt)
     }
+    const eventIsCancelled = async () => {
+      const isCancelled = await isEventCanceled(event.contractAddress)
+      setIsCancelled(isCancelled)
+    }
+
     getMintLimitPerAddress()
+    eventIsCancelled()
   }, []);
 
   const incrementCat = () => {
@@ -74,13 +83,26 @@ const EventPurchase = ({ params }) => {
   }
   
   return (
-    <div className="h-full w-full flex flex-col items-center justify-start py-10 bg-gray-200">
+    <div className="h-full w-full flex flex-col items-center justify-start py-10 pb-20 bg-gray-200">
       {isLoading && <Loading/>}
       <div className="max-w-1/2 flex flex-col items-center justify-center bg-white rounded-md p-7 shadow-lg">
         <img src={event.eventImg} className="h-[400px] w-[800px] rounded-md"/>
         <div className="flex flex-col justify-start items-stretch w-[800px]">
-          <div className="font-extrabold text-3xl my-5">
-            {event.eventTitle}
+          <div className='flex items-center my-5'>
+            <div className="font-extrabold text-3xl mr-3">
+              {event.eventTitle}
+            </div>
+            {isCancelled ? (
+                <span className='flex items-center text-red-500 text-lg'>
+                    <FaRegThumbsDown className='mr-1'/>
+                    Event Cancelled
+                </span>
+            ) : (
+                <span className='flex items-center text-green-500 text-lg'>
+                    <FaRegThumbsUp className='mr-1'/>
+                    Event Active
+                </span>
+            )}
           </div>
           <div className="flex flex-row justify-between">
             <div className="flex flex-col w-3/4">

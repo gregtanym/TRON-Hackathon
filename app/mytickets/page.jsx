@@ -48,7 +48,7 @@ const MyTickets = () => {
   }, [myTickets])
 
   return (
-    <section className="w-full flex flex-col items-center">
+    <section className="w-full flex flex-col items-center pb-20">
       {isLoading && <Loading/>}
       <div className=' flex self-start mt-8 px-12'>
         <div className='flex flex-col items-center'>

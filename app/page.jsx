@@ -9,7 +9,7 @@ import ConcertFeed from '@/components/homepage/ConcertFeed'
 const Home = () => {
   const {testContextValue} = useGlobalContext()
   return (
-    <section className="w-full flex-center flex-col h-full">
+    <section className="w-full flex-center flex-col h-full pb-20">
       <HomeHero/>
       <CategoryFeed/>
       <ConcertFeed/>

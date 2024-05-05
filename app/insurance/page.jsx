@@ -3,7 +3,7 @@ import React from 'react'
 
 const Insurance = () => {
     return (
-      <section className="w-full flex-center flex-col">
+      <section className="w-full flex-center flex-col pb-20">
           <div>This is insurance page</div>
       </section>
     )

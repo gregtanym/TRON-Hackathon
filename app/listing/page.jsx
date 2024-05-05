@@ -36,7 +36,7 @@ const ListingPage = () => {
     console.log("this is the found listing: ", listingDetails)
 
   return (
-    <div className='w-full h-full'>
+    <div className='w-full h-full pb-20'>
         <div className='w-full px-4 my-4'>
             <Link href='/marketplace'>Marketplace</Link> | <span className='font-semibold'>{listingDetails.eventTitle}</span>
         </div>

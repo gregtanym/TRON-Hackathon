@@ -346,7 +346,7 @@ const AppProvider = (({children}) => {
             tronWeb, 
             adapter, readyState, account, network, isLoading, myTickets, marketplaceListings,
             setReadyState, setAccount, setNetwork, setIsLoading, setMyTickets, setMarketplaceListings,
-            getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens, getAllActiveListings,
+            getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens, getAllActiveListings, isEventCanceled,
             mintTicket, buyInsurance, redeemTicket, listTicket, updateTicketStatus, approveNFTContractToMarketplace, buyTicket,
             decodeHexString, isTronLinkConnected
         }}>
