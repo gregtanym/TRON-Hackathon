@@ -14,6 +14,9 @@ const VR = () => {
         allowfullscreen="true"
         className="w-2/3 aspect-video mt-20"
       />
+      {/* <video className="w-2/3 aspect-video mt-20" controls preload="none">
+        <source src="/videos/tswift-vr.mp4" type="video/mp4" />
+      </video> */}
     </section>
   );
 };
