@@ -3,7 +3,7 @@ import { IoClose } from "react-icons/io5";
 import { useGlobalContext } from '@/app/Context/store';
 
 const ListTicketModal = ({ tokenId, contractAddress, onClose }) => {
-    const {listTicket, setIsLoading, updateTicketStatus, isTronLinkConnected, decodeHexString, approveNFTContractToMarketplace} = useGlobalContext()
+    const {listTicket, setIsTransactionLoading, updateTicketStatus, isTronLinkConnected, decodeHexString, approveNFTContractToMarketplace} = useGlobalContext()
     const [listedTRXPrice, setListedTRXPrice] = useState()
 
 
@@ -19,10 +19,10 @@ const ListTicketModal = ({ tokenId, contractAddress, onClose }) => {
         }
 
         onClose()
-        setIsLoading(true)
+        setIsTransactionLoading(true)
         if (!isTronLinkConnected()) {
           alert("Please connect your TronLink Wallet before buying ticket insurance")
-          setIsLoading(false)
+          setIsTransactionLoading(false)
           return
         }
     
@@ -37,15 +37,15 @@ const ListTicketModal = ({ tokenId, contractAddress, onClose }) => {
         } catch (err) {
           alert(`Error during transaction: ${err.message}`);
         } finally {
-          setIsLoading(false)
+          setIsTransactionLoading(false)
         }
     }
 
     const handleMarketplaceApproval = async () => {
-        setIsLoading(true)
+        setIsTransactionLoading(true)
         if (!isTronLinkConnected()) {
           alert("Please connect your TronLink Wallet before buying ticket insurance")
-          setIsLoading(false)
+          setIsTransactionLoading(false)
           return
         }
     
@@ -59,7 +59,7 @@ const ListTicketModal = ({ tokenId, contractAddress, onClose }) => {
         } catch (err) {
           alert(`Error during transaction: ${err.message}`);
         } finally {
-          setIsLoading(false)
+          setIsTransactionLoading(false)
         }
     }
 

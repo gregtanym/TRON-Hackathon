@@ -11,11 +11,11 @@ import { useState, useEffect } from "react";
 import { useGlobalContext } from "@/app/Context/store";
 import { FaRegThumbsUp } from "react-icons/fa";
 import { FaRegThumbsDown } from "react-icons/fa";
-import Loading from "@/components/Loading";
+import TransactionLoading from "@/components/TransactionLoading";
 
 const EventPurchase = ({ params }) => {
 
-  const {decodeHexString, isLoading, setIsLoading, mintTicket, isTronLinkConnected, getCatPrices, getMintLimit, isEventCanceled} = useGlobalContext()
+  const {decodeHexString, isTransactionLoading, setIsTransactionLoading, mintTicket, isTronLinkConnected, getCatPrices, getMintLimit, isEventCanceled} = useGlobalContext()
 
 
   const [selectedCategory, setSelectedCategory] = useState(1) // actual cat index is different from the selected categoryyyyy
@@ -56,10 +56,10 @@ const EventPurchase = ({ params }) => {
   }
 
   const handlePurchase = async () => {
-    setIsLoading(true)
+    setIsTransactionLoading(true)
     if (!isTronLinkConnected()) {
       alert("Please connect your TronLink Wallet before purchasing a ticket!")
-      setIsLoading(false)
+      setIsTransactionLoading(false)
       return
     }
 
@@ -78,13 +78,13 @@ const EventPurchase = ({ params }) => {
     } catch (err) {
       alert(`Error during transaction: ${err.message}`);
     } finally {
-      setIsLoading(false)
+      setIsTransactionLoading(false)
     }
   }
   
   return (
     <div className="h-full w-full flex flex-col items-center justify-start py-10 pb-20 bg-gray-200">
-      {isLoading && <Loading/>}
+      {isTransactionLoading && <TransactionLoading/>}
       <div className="max-w-1/2 flex flex-col items-center justify-center bg-white rounded-md p-7 shadow-lg">
         <img src={event.eventImg} className="h-[400px] w-[800px] rounded-md"/>
         <div className="flex flex-col justify-start items-stretch w-[800px]">

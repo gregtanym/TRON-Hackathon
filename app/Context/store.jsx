@@ -15,6 +15,7 @@ const AppProvider = (({children}) => {
     const [myTickets, setMyTickets] = useState([])
     const [marketplaceListings, setMarketplaceListings] = useState([])
 
+    const [isTransactionLoading, setIsTransactionLoading] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
 
     const HttpProvider = TronWeb.providers.HttpProvider;
@@ -344,8 +345,8 @@ const AppProvider = (({children}) => {
     return(
         <AppContext.Provider value={{
             tronWeb, 
-            adapter, readyState, account, network, isLoading, myTickets, marketplaceListings,
-            setReadyState, setAccount, setNetwork, setIsLoading, setMyTickets, setMarketplaceListings,
+            adapter, readyState, account, network, isTransactionLoading, myTickets, marketplaceListings,isLoading,
+            setReadyState, setAccount, setNetwork, setIsTransactionLoading, setMyTickets, setMarketplaceListings, setIsLoading,
             getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens, getAllActiveListings, isEventCanceled,
             mintTicket, buyInsurance, redeemTicket, listTicket, updateTicketStatus, approveNFTContractToMarketplace, buyTicket,
             decodeHexString, isTronLinkConnected

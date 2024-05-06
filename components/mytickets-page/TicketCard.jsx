@@ -4,21 +4,21 @@ import React, { useState } from 'react'
 import { FaRegThumbsUp } from "react-icons/fa";
 import { FaRegThumbsDown } from "react-icons/fa";
 import { useGlobalContext } from '@/app/Context/store';
-import Loading from '../Loading';
+import TransactionLoading from '../TransactionLoading';
 import ListTicketModal from './ListTicketModal';
 import RedeemTicketModal from './RedeemTicketModal';
 
 const TicketCard = ({contractAddress, eventId, title, date, time, location, tokenId, isRedeemed, isInsured, catClass, imageURL, isCancelled, originalTicketPrice, isListed}) => {
-    const {isLoading, setIsLoading, buyInsurance, isTronLinkConnected, redeemTicket, decodeHexString, setMyTickets, updateTicketStatus} = useGlobalContext()
+    const {isTransactionLoading, setIsTransactionLoading, buyInsurance, isTronLinkConnected, redeemTicket, decodeHexString, setMyTickets, updateTicketStatus} = useGlobalContext()
     const [isListPopupOpen, setIsListPopupOpen] = useState(false); 
     const [isRedeemPopupOpen, setIsRedeemPopupOpen] = useState(false); 
 
 
     const handleBuyInsurance = async () => {
-        setIsLoading(true)
+        setIsTransactionLoading(true)
         if (!isTronLinkConnected()) {
           alert("Please connect your TronLink Wallet before buying ticket insurance")
-          setIsLoading(false)
+          setIsTransactionLoading(false)
           return
         }
     
@@ -33,7 +33,7 @@ const TicketCard = ({contractAddress, eventId, title, date, time, location, toke
         } catch (err) {
           alert(`Error during transaction: ${err.message}`);
         } finally {
-          setIsLoading(false)
+          setIsTransactionLoading(false)
         }
     }
 

@@ -19,7 +19,7 @@ import ChatHeader from "@/components/chat/ChatHeader";
 
 export default function Chat() {
   const ref = useRef(null);
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+  const { messages, input, handleInputChange, handleSubmit, isTransactionLoading } =
     useChat({
       initialMessages: [
         {
@@ -147,7 +147,7 @@ export default function Chat() {
                 size="icon"
                 type="submit"
                 variant="secondary"
-                disabled={isLoading}
+                disabled={isTransactionLoading}
                 className="absolute right-1 top-1 h-8 w-10 bg-black hover:bg-gray-500"
               >
                 <SendHorizontalIcon className="h-5 w-5 text-yellow-300" />

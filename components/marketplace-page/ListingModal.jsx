@@ -8,7 +8,7 @@ import { IoClose } from "react-icons/io5";
 import { useGlobalContext } from '@/app/Context/store';
 
 const ListingModal = ({ isOpen, listing, onClose }) => {
-  const {buyTicket, isTronLinkConnected, setIsLoading, decodeHexString} = useGlobalContext()
+  const {buyTicket, isTronLinkConnected, setIsTransactionLoading, decodeHexString} = useGlobalContext()
   if (!isOpen) return null;
 
   const handleModalClick = (event) => {
@@ -16,10 +16,10 @@ const ListingModal = ({ isOpen, listing, onClose }) => {
   };
 
   const buyResaleTicket = async () => {
-    setIsLoading(true)
+    setIsTransactionLoading(true)
     if (!isTronLinkConnected()) {
       alert("Please connect your TronLink Wallet before buying ticket insurance")
-      setIsLoading(false)
+      setIsTransactionLoading(false)
       return
     }
 
@@ -33,7 +33,7 @@ const ListingModal = ({ isOpen, listing, onClose }) => {
     } catch (err) {
       alert(`Error during transaction: ${err.message}`);
     } finally {
-      setIsLoading(false)
+      setIsTransactionLoading(false)
     }
   }
 

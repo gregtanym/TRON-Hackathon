@@ -3,12 +3,13 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import { useGlobalContext } from '../Context/store'
 import TicketCard from '@/components/mytickets-page/TicketCard'
-import Loading from '@/components/Loading'
+import TransactionLoading from '@/components/TransactionLoading'
 import ListTicketModal from '@/components/mytickets-page/ListTicketModal'
+import Loading from '@/components/Loading'
 
 const MyTickets = () => {
 
-  const {account, getAllOwnedTokens, myTickets, isLoading, } = useGlobalContext()
+  const {account, getAllOwnedTokens, myTickets, isTransactionLoading, isLoading, setIsLoading} = useGlobalContext()
   const [selectedFilter, setSelectedFilter] = useState("Purchased")
 
   const handleFilterChange = (event) => {
@@ -33,13 +34,17 @@ const MyTickets = () => {
   useEffect(() => {
     const fetchTickets = async () => {
       if (account) { 
+        setIsLoading(true)
         try {
           await getAllOwnedTokens(account);
         } catch (error) {
           console.error("Failed to fetch tickets:", error);
+        } finally {
+          setIsLoading(false)
         }
       }
     };
+    console.log("fetchTickets called")
     fetchTickets()
   }, [account])
 
@@ -50,6 +55,7 @@ const MyTickets = () => {
   return (
     <section className="w-full flex flex-col items-center pb-20">
       {isLoading && <Loading/>}
+      {isTransactionLoading && <TransactionLoading/>}
       <div className=' flex self-start mt-8 px-12'>
         <div className='flex flex-col items-center'>
           <h2 className="text-3xl font-bold">MY TICKETS</h2>

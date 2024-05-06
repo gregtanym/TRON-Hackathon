@@ -5,18 +5,22 @@ import { useGlobalContext } from '@/app/Context/store'
 import HomeSearchBar from '@/components/homepage/HomeSearchBar'
 import ListingCard from '@/components/marketplace-page/ListingCard'
 import ListingModal from '@/components/marketplace-page/ListingModal'
+import Loading from '@/components/Loading'
 
 const Marketplace = () => {
 
-  const {getAllActiveListings, marketplaceListings} = useGlobalContext()
+  const {getAllActiveListings, marketplaceListings, isLoading, setIsLoading} = useGlobalContext()
   const [selectedListing, setSelectedListing] = useState(null);
 
   useEffect(() => {
     const fetchListings = async () => {
+      setIsLoading(true)
       try {
         await getAllActiveListings();
       } catch (error) {
           console.error("Failed to fetch listings:", error);
+      } finally {
+        setIsLoading(false)
       }
     }
     fetchListings()
@@ -36,6 +40,7 @@ const Marketplace = () => {
 
     return (
       <section className="w-full flex-center flex-col h-full pb-20">
+        {isLoading && <Loading/>}
           <div className='w-full bg-gray-800 flex flex-col items-center pt-6'>
             <HomeSearchBar/>
             <div className='self-end my-5 mx-8'>

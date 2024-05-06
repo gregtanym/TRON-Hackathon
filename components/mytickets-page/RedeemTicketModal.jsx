@@ -4,7 +4,7 @@ import { useGlobalContext } from '@/app/Context/store';
 import { useRouter } from 'next/navigation';
 
 const RedeemTicketModal = ({ tokenId, contractAddress, onClose }) => {
-    const {setIsLoading, isTronLinkConnected, decodeHexString, getAllOwnedTokens, account, redeemTicket} = useGlobalContext()
+    const {setIsTransactionLoading, isTronLinkConnected, decodeHexString, getAllOwnedTokens, account, redeemTicket} = useGlobalContext()
     const [userEmail, setUserEmail] = useState()
     const [isChecked, setIsChecked] = useState(false)
 
@@ -26,10 +26,10 @@ const RedeemTicketModal = ({ tokenId, contractAddress, onClose }) => {
             return;
         }
 
-        setIsLoading(true)
+        setIsTransactionLoading(true)
         if (!isTronLinkConnected()) {
           alert("Please connect your TronLink Wallet before redeeming your ticket")
-          setIsLoading(false)
+          setIsTransactionLoading(false)
           return
         }
 
@@ -54,7 +54,7 @@ const RedeemTicketModal = ({ tokenId, contractAddress, onClose }) => {
         } catch (error) {
             alert(`Error getting image: ${error.message}`);
         } finally {
-            setIsLoading(false)
+            setIsTransactionLoading(false)
         }
     }
 
