@@ -21,7 +21,7 @@ const EventPurchase = ({ params }) => {
   const [selectedCategory, setSelectedCategory] = useState(1) // actual cat index is different from the selected categoryyyyy
   const [selectedQuantity, setSelectedQuantity] = useState(1)
   const [eventMintLimit, setEventMintLimit] = useState(null);
-  const [isCancelled, setIsCancelled] = useState(null);
+  const [isCancelled, setIsCancelled] = useState(false);
   const eventId = params.id
   const event = eventData.find(event => event.eventId === eventId)
   
@@ -159,9 +159,11 @@ const EventPurchase = ({ params }) => {
                 </div>
               </div>
               <div className="w-3/4 flex justify-center mt-3">
-                <button className="bg-yellow-400 text-black px-4 py-2 rounded font-semibold flex items-center justify-center
-                  group transition duration-300 ease-in-out transform hover:scale-105 hover:z-10
-                  hover:bg-yellow-300" onClick={handlePurchase}>
+                <button disabled={isCancelled} className={`${isCancelled 
+                  ? "bg-gray-400 text-gray-500"
+                  : "bg-yellow-400 text-black group transition duration-300 ease-in-out transform hover:scale-105 hover:z-10 hover:bg-yellow-300"} 
+                  px-4 py-2 rounded font-semibold flex items-center justify-center`}
+                  onClick={handlePurchase}>
                     <IoTicketOutline className="mr-2" size={20}/>Buy Tickets
                 </button>
               </div>
