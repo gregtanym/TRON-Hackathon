@@ -6,10 +6,12 @@ import { FaRegThumbsDown } from "react-icons/fa";
 import { useGlobalContext } from '@/app/Context/store';
 import Loading from '../Loading';
 import ListTicketModal from './ListTicketModal';
+import RedeemTicketModal from './RedeemTicketModal';
 
 const TicketCard = ({contractAddress, eventId, title, date, time, location, tokenId, isRedeemed, isInsured, catClass, imageURL, isCancelled, originalTicketPrice, isListed}) => {
     const {isLoading, setIsLoading, buyInsurance, isTronLinkConnected, redeemTicket, decodeHexString, setMyTickets, updateTicketStatus} = useGlobalContext()
-    const [isPopupOpen, setIsPopupOpen] = useState(false); 
+    const [isListPopupOpen, setIsListPopupOpen] = useState(false); 
+    const [isRedeemPopupOpen, setIsRedeemPopupOpen] = useState(false); 
 
 
     const handleBuyInsurance = async () => {
@@ -35,37 +37,24 @@ const TicketCard = ({contractAddress, eventId, title, date, time, location, toke
         }
     }
 
-    const handleRedeemTicket = async () => {
-        setIsLoading(true)
-        if (!isTronLinkConnected()) {
-          alert("Please connect your TronLink Wallet before buying ticket insurance")
-          setIsLoading(false)
-          return
-        }
     
-        try {
-          const {success, error} = await redeemTicket(contractAddress, tokenId)
-    
-          if (!success){
-            throw new Error(decodeHexString(error.output.contractResult[0]))
-          }
-          updateTicketStatus(tokenId, {isRedeemed: true})
-          alert("Ticket Redeemed Successfully!")
-        } catch (err) {
-          alert(`Error during transaction: ${err.message}`);
-        } finally {
-          setIsLoading(false)
-        }
-    }
 
     const handleCloseModal = () => {   
-      setIsPopupOpen(false)
+      setIsListPopupOpen(false)
+      setIsRedeemPopupOpen(false)
     }
 
   return (
     <div className='border-b-2 border-black mx-8 my-2 py-2 flex flex-row w-full'>
-      {isPopupOpen && 
+      {isListPopupOpen && 
         <ListTicketModal 
+          tokenId={tokenId}
+          contractAddress={contractAddress}
+          onClose={handleCloseModal} 
+        />
+      }
+      {isRedeemPopupOpen && 
+        <RedeemTicketModal 
           tokenId={tokenId}
           contractAddress={contractAddress}
           onClose={handleCloseModal} 
@@ -99,10 +88,10 @@ const TicketCard = ({contractAddress, eventId, title, date, time, location, toke
             <button disabled={isInsured} className={`${isInsured ? "text-yellow-300 bg-gray-700 cursor-default" :"bg-yellow-300 hover:bg-yellow-400 text-black" } font-semibold text-lg w-28 py-1 rounded-md`} onClick={handleBuyInsurance}>
                 {isInsured ? "Insured!": "Insure"}
             </button>
-            <button disabled={isRedeemed} className={`${isRedeemed ? "text-yellow-300 bg-gray-700 cursor-default" :"bg-yellow-300 hover:bg-yellow-400 text-black" } font-semibold text-lg w-28 py-1 rounded-md`} onClick={handleRedeemTicket}>
+            <button disabled={isRedeemed} className={`${isRedeemed ? "text-yellow-300 bg-gray-700 cursor-default" :"bg-yellow-300 hover:bg-yellow-400 text-black" } font-semibold text-lg w-28 py-1 rounded-md`} onClick={() => setIsRedeemPopupOpen(true)}>
                 {isRedeemed ? "Redeemed!": "Redeem"}
             </button>
-            <button disabled={isListed} className={`${isListed ? "text-yellow-300 bg-gray-700 cursor-default" :"bg-yellow-300 hover:bg-yellow-400 text-black" } font-semibold text-lg w-28 py-1 rounded-md`} onClick={() => setIsPopupOpen(true)}>
+            <button disabled={isListed} className={`${isListed ? "text-yellow-300 bg-gray-700 cursor-default" :"bg-yellow-300 hover:bg-yellow-400 text-black" } font-semibold text-lg w-28 py-1 rounded-md`} onClick={() => setIsListPopupOpen(true)}>
                 {isListed ? "Listed!": "List"}  
             </button>
         </div>
