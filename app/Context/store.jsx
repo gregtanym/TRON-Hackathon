@@ -14,6 +14,7 @@ const AppProvider = (({children}) => {
     const adapter = useMemo(() => new TronLinkAdapter(), []);
     const [myTickets, setMyTickets] = useState([])
     const [marketplaceListings, setMarketplaceListings] = useState([])
+    const [availableClaims, setAvailableClaims] = useState([])
 
     const [isTransactionLoading, setIsTransactionLoading] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -45,7 +46,6 @@ const AppProvider = (({children}) => {
         return decimalPrice
     }
 
-    // const getMintLimit = (contractAddress) => {
     const getMintLimit = async (contractAddress) => {
         const contract = await tronWeb.contract().at(contractAddress)
         const mintLimit = await contract.mintLimitPerAddress().call()
@@ -138,9 +138,77 @@ const AppProvider = (({children}) => {
         return imageURL
     }
 
+    const getSaleStartTime = async (contractAddress) => {
+        const contract = await tronWeb.contract().at(contractAddress)
+        const time = await contract.saleStartTime().call()
+        return time
+    }
+
     const isEventCanceled = async (contractAddress) => {
         const contract = await tronWeb.contract().at(contractAddress)
         return await contract.eventCanceled().call()
+    }
+
+    const getAvailableInsuranceClaims =  async (userAddress) => {
+        try {
+            setAvailableClaims([])
+            let allNewClaims = []; 
+
+            const marketplaceContract = await tronWeb.contract().at(process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS)
+    
+            // Wait for all promises from map to resolve
+            await Promise.all(eventData.map(async (event) => {
+                console.log(event.eventTitle, event.contractAddress);
+                const currentContractAddress = event.contractAddress;
+                const contract = await tronWeb.contract().at(currentContractAddress);
+
+                if (!await contract.eventCanceled().call()) {
+                    // continue
+                }
+
+                const insuredTokenIds = await contract.getInsuredTokenIds(userAddress).call();
+                console.log(event.eventTitle, "Claims found: ", insuredTokenIds);
+    
+                // Temporary array for this contract
+                let tempClaims = [];
+                for (let i = 0; i < insuredTokenIds.length; i++) {
+                    const currentTokenId = tronWeb.toDecimal(insuredTokenIds[i]._hex);
+                    const isInsured = await contract.ticketInsurance(currentTokenId).call();
+                    const catIndex = await contract.determineCategoryId(currentTokenId).call();
+                    const catClass = tronWeb.toDecimal(catIndex) + 1;
+                    const isCancelled = true;
+                    // const isRedeemed = await contract.isTicketRedeemed(currentTokenId).call();
+
+                    const originalTicketPrice = Number(tronWeb.toSun(event.catPricing[catIndex])) // returns string
+                    const insurancePaid = 20/100 * originalTicketPrice
+                    const refundAmount = tronWeb.fromSun(originalTicketPrice + insurancePaid)
+    
+                    const newClaim = {
+                        "contractAddress": currentContractAddress, 
+                        "eventId": event.eventId,
+                        "eventTitle": event.eventTitle,
+                        "date": event.date,
+                        "time": event.time, 
+                        "location": event.location, 
+                        "tokenId": currentTokenId,
+                        "isInsured": isInsured,
+                        "catClass": catClass,
+                        "isCancelled": isCancelled,
+                        "refundAmount": refundAmount
+                        // "originalTicketPrice": tronWeb.toSun(event.catPricing[catIndex]),
+                        // "isRedeemed": isRedeemed,
+                    };
+    
+                    tempClaims.push(newClaim);
+                }
+    
+                allNewClaims = allNewClaims.concat(tempClaims);
+            }));
+            setAvailableClaims(allNewClaims);
+        } catch (error) {
+            console.error("Error in getAvailableInsuranceClaims: ", error);
+            throw error;
+        }
     }
 
     // READ FUNCTIONS (MARKETPLACE CONTRACT)
@@ -197,6 +265,7 @@ const AppProvider = (({children}) => {
                     "isInsured": await currentContractInstance.ticketInsurance(listing.tokenId).call(),
                     "catClass": parseInt(await currentContractInstance.determineCategoryId(listing.tokenId).call()) + 1,
                     "tokenImgURL": await currentContractInstance.tokenURI(listing.tokenId).call(),
+                    "isCancelled": await currentContractInstance.eventCanceled().call()
                 }
                 listingsList.push(newListingInfo)
             }
@@ -234,7 +303,7 @@ const AppProvider = (({children}) => {
     const buyInsurance = async (contractAddress, tokenId, originalTicketPrice) => {
         try {
             const contract = await tronWeb.contract().at(contractAddress)
-            const insurancePrice = parseInt(originalTicketPrice) * 20/100
+            const insurancePrice = Number(originalTicketPrice) * 20/100
             const result = await contract.buyInsurance(tokenId).send({
                 feeLimit: 1000000000,
                 callValue: insurancePrice,
@@ -260,6 +329,22 @@ const AppProvider = (({children}) => {
             return {success: true, result}
         } catch (error) {
             console.log("Error redeeming ticket: ", error)
+            return { success: false, error }
+        }
+    }
+
+    const claimInsurance = async (contractAddress, tokenId) => {
+        try {
+            const contract = await tronWeb.contract().at(contractAddress)
+            const result = await contract.claimRefund(tokenId).send({
+                feeLimit: 1000000000,
+                callValue: 0,
+                // shouldPollResponse: true
+            })
+            console.log("Claim refund: ", result) // result is the transaction hash
+            return {success: true, result}
+        } catch (error) {
+            console.log("Error claiming refund: ", error)
             return { success: false, error }
         }
     }
@@ -345,10 +430,10 @@ const AppProvider = (({children}) => {
     return(
         <AppContext.Provider value={{
             tronWeb, 
-            adapter, readyState, account, network, isTransactionLoading, myTickets, marketplaceListings,isLoading,
-            setReadyState, setAccount, setNetwork, setIsTransactionLoading, setMyTickets, setMarketplaceListings, setIsLoading,
-            getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens, getAllActiveListings, isEventCanceled,
-            mintTicket, buyInsurance, redeemTicket, listTicket, updateTicketStatus, approveNFTContractToMarketplace, buyTicket,
+            adapter, readyState, account, network, isTransactionLoading, myTickets, marketplaceListings, isLoading, availableClaims,
+            setReadyState, setAccount, setNetwork, setIsTransactionLoading, setMyTickets, setMarketplaceListings, setIsLoading, setAvailableClaims,
+            getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens, getAllActiveListings, isEventCanceled, getAvailableInsuranceClaims, getSaleStartTime,
+            mintTicket, buyInsurance, redeemTicket, listTicket, updateTicketStatus, approveNFTContractToMarketplace, buyTicket, claimInsurance,
             decodeHexString, isTronLinkConnected
         }}>
             {children}

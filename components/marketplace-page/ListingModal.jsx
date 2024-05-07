@@ -6,10 +6,14 @@ import { TbPigMoney } from "react-icons/tb";
 import { MdRedeem } from "react-icons/md";
 import { IoClose } from "react-icons/io5"; 
 import { useGlobalContext } from '@/app/Context/store';
+import { FaRegThumbsUp } from "react-icons/fa";
+import { FaRegThumbsDown } from "react-icons/fa";
 
 const ListingModal = ({ isOpen, listing, onClose }) => {
   const {buyTicket, isTronLinkConnected, setIsTransactionLoading, decodeHexString} = useGlobalContext()
   if (!isOpen) return null;
+
+  console.log(listing)
 
   const handleModalClick = (event) => {
     event.stopPropagation();
@@ -55,12 +59,25 @@ const ListingModal = ({ isOpen, listing, onClose }) => {
                 <div className='font-semibold text-lg'>{listing.date}</div>
                 <div className='text-md'>{listing.time}</div>
                 <div className='text-md'>{listing.location}</div>
+                <div className='flex'>
+                  {listing.isCancelled ? (
+                      <span className='flex items-center text-red-600 font-semibold'>
+                          <FaRegThumbsDown className='mr-1'/>
+                          Event Cancelled
+                      </span>
+                  ) : (
+                      <span className='flex items-center text-green-600 font-semibold'>
+                          <FaRegThumbsUp className='mr-1'/>
+                          Event Active
+                      </span>
+                  )}
+                </div>
                 <div className='text-sm text-gray-600 mt-3'>CATEGORY {listing.catClass} TICKET</div>
                 <div className='text-sm text-gray-600'>TICKET ID: {listing.tokenId}</div>
                 <div className='text-sm text-gray-600 mb-3'>OWNER WALLET ADDRESS: {listing.sellerAddress}</div>
-                <div className={`flex items-center font-semibold ${listing.isRedeemed ? "text-red-600" : "text-green-600"}`}><MdRedeem/>{listing.isRedeemed ? "Redeemed" : "Redeemable"}</div>
-                <div className={`flex items-center font-semibold ${listing.isInsured ? "text-green-600" : "text-red-600"}`}><TbPigMoney/>{listing.isInsured ? "Insured" : "Uninsured"}</div>
-                <div className='text-green-700 text-2xl font-bold my-3 flex flex-row items-center'><RiCoinsLine/> {listing.listingPrice} TRX</div>
+                <div className={`flex items-center ${listing.isRedeemed ? "text-red-600" : "text-green-600"}`}><MdRedeem/>{listing.isRedeemed ? "Redeemed" : "Redeemable"}</div>
+                <div className={`flex items-center ${listing.isInsured ? "text-green-600" : "text-red-600"}`}><TbPigMoney/>{listing.isInsured ? "Insured" : "Uninsured"}</div>
+                <div className='text-2xl font-bold my-3 flex flex-row items-center'><RiCoinsLine/> {listing.listingPrice} TRX</div>
                 <button className="bg-yellow-300 hover:bg-yellow-400 text-black font-bold text-2xl w-48 py-1.5 rounded-md" onClick={buyResaleTicket}>
                     BUY NOW
                 </button>

@@ -15,13 +15,14 @@ import TransactionLoading from "@/components/TransactionLoading";
 
 const EventPurchase = ({ params }) => {
 
-  const {decodeHexString, isTransactionLoading, setIsTransactionLoading, mintTicket, isTronLinkConnected, getCatPrices, getMintLimit, isEventCanceled} = useGlobalContext()
+  const {decodeHexString, isTransactionLoading, setIsTransactionLoading, mintTicket, isTronLinkConnected, getCatPrices, getMintLimit, isEventCanceled, getSaleStartTime} = useGlobalContext()
 
 
   const [selectedCategory, setSelectedCategory] = useState(1) // actual cat index is different from the selected categoryyyyy
   const [selectedQuantity, setSelectedQuantity] = useState(1)
   const [eventMintLimit, setEventMintLimit] = useState(null);
   const [isCancelled, setIsCancelled] = useState(false);
+  const [saleStartTime, setSaleStartTime] = useState(null);
   const eventId = params.id
   const event = eventData.find(event => event.eventId === eventId)
   
@@ -34,9 +35,20 @@ const EventPurchase = ({ params }) => {
       const isCancelled = await isEventCanceled(event.contractAddress)
       setIsCancelled(isCancelled)
     }
+    const getSaleTime = async () => {
+      const startTime = await getSaleStartTime(event.contractAddress)
+      const date = new Date(startTime * 1000)
+      const optionsDate = { day: 'numeric', month: 'short', year: 'numeric' };
+      const formattedDate = date.toLocaleDateString('en-US', optionsDate).toUpperCase(); 
+
+      const optionsTime = { hour: 'numeric', minute: '2-digit', hour12: true };
+      const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
+      setSaleStartTime(`${formattedTime} ${formattedDate}`)
+    }
 
     getMintLimitPerAddress()
     eventIsCancelled()
+    getSaleTime()
   }, []);
 
   const incrementCat = () => {
@@ -137,6 +149,8 @@ const EventPurchase = ({ params }) => {
                 <div className="mb-1 font-semibold text-xl">
                   Ticket Information
                 </div>
+                <div>General Sale: </div>
+                <div className="font-medium mb-1">{saleStartTime}</div>
                 {event.catPricing.map((price, index) => 
                   <div className="text-sm" key={index}>Cat {index + 1}: <span className="font-semibold">{price} TRX</span></div>
                 )}
