@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { IoClose } from "react-icons/io5"; 
 import { useGlobalContext } from '@/app/Context/store';
+import ConfirmationModal from '../ConfirmationModal';
 
 const ListTicketModal = ({ tokenId, contractAddress, onClose }) => {
-    const {listTicket, setIsTransactionLoading, updateTicketStatus, isTronLinkConnected, decodeHexString, approveNFTContractToMarketplace, getAllOwnedTokens, account} = useGlobalContext()
+    const {listTicket, setIsTransactionLoading, updateTicketStatus, isTronLinkConnected, decodeHexString, approveNFTContractToMarketplace, getAllOwnedTokens, account, setIsConfirmationModalOpen, isConfirmationModalOpen, transactionUrl, setTransactionUrl} = useGlobalContext()
     const [listedTRXPrice, setListedTRXPrice] = useState()
 
 
@@ -26,13 +27,14 @@ const ListTicketModal = ({ tokenId, contractAddress, onClose }) => {
         }
     
         try {
-          const {success, error} = await listTicket(contractAddress, tokenId, listedTRXPrice)
+          const {success, error, result} = await listTicket(contractAddress, tokenId, listedTRXPrice)
     
           if (!success){
             throw new Error(decodeHexString(error.output.contractResult[0]))
           }
           getAllOwnedTokens(account)
-          alert("Ticket Listed Successfully!")
+          setTransactionUrl(`https://nile.tronscan.org/#/transaction/${result}`)
+          setIsConfirmationModalOpen(true)
           onClose()
         } catch (err) {
           alert(`Error during transaction: ${err.message}`);
@@ -50,12 +52,13 @@ const ListTicketModal = ({ tokenId, contractAddress, onClose }) => {
         }
     
         try {
-          const {success, error} = await approveNFTContractToMarketplace(contractAddress, tokenId)
+          const {success, error, result} = await approveNFTContractToMarketplace(contractAddress, tokenId)
     
           if (!success){
             throw new Error(decodeHexString(error.output.contractResult[0]))
           }
-          alert("Marketplace Approved Successfully!")
+          setTransactionUrl(`https://nile.tronscan.org/#/transaction/${result}`)
+          setIsConfirmationModalOpen(true)
         } catch (err) {
           alert(`Error during transaction: ${err.message}`);
         } finally {
@@ -65,6 +68,11 @@ const ListTicketModal = ({ tokenId, contractAddress, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20" onClick={onClose}>
+      <ConfirmationModal 
+        isOpen={isConfirmationModalOpen}
+        onClose={() => setIsConfirmationModalOpen(false)}
+        url={transactionUrl}
+      />
       <div className="bg-white p-5 rounded-lg w-1/2 h-3/5 overflow-y-auto flex flex-col" onClick={handleModalClick}>
         <div className='w-full flex justify-end'>
             <button onClick={onClose} className="text-lg self-end">

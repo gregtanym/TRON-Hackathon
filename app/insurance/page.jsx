@@ -4,9 +4,13 @@ import { useGlobalContext } from '../Context/store'
 import Loading from '@/components/Loading'
 import sampleClaims from "../../data/sampleClaims.json"
 import TransactionLoading from '@/components/TransactionLoading'
+import ConfirmationModal from '@/components/ConfirmationModal'
 
 const Insurance = () => {
-  const {account, getAvailableInsuranceClaims, isLoading, setIsLoading, availableClaims, claimInsurance, setIsTransactionLoading, isTronLinkConnected, decodeHexString, isTransactionLoading} = useGlobalContext()
+  const {account, getAvailableInsuranceClaims, isLoading, setIsLoading, availableClaims, claimInsurance, 
+    setIsTransactionLoading, isTronLinkConnected, decodeHexString, 
+    isTransactionLoading, setIsConfirmationModalOpen, isConfirmationModalOpen, transactionUrl, setTransactionUrl
+  } = useGlobalContext()
 
   useEffect(() => {
     const fetchAvailableClaims = async () => {
@@ -33,12 +37,14 @@ const Insurance = () => {
     }
 
     try {
-      const {success, error} = await claimInsurance(contractAddress, tokenId)
+      const {success, error, result} = await claimInsurance(contractAddress, tokenId)
 
       if (!success){
         throw new Error(decodeHexString(error.output.contractResult[0]))
       }
-      alert("Refund claim successful!")
+
+      setTransactionUrl(`https://nile.tronscan.org/#/transaction/${result}`)
+      setIsConfirmationModalOpen(true)
       getAvailableInsuranceClaims(account)
     } catch (err) {
       alert(`Error during transaction: ${err.message}`);
@@ -49,6 +55,11 @@ const Insurance = () => {
 
   return (
     <section className="w-full flex-center flex-col pb-20">
+      <ConfirmationModal 
+        isOpen={isConfirmationModalOpen}
+        onClose={() => setIsConfirmationModalOpen(false)}
+        url={transactionUrl}
+      />
       {isLoading && <Loading/>}
       {isTransactionLoading && <TransactionLoading/>}
       <div className=' flex self-start mt-8 px-12'>

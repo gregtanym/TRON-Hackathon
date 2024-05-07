@@ -15,6 +15,8 @@ const AppProvider = (({children}) => {
     const [myTickets, setMyTickets] = useState([])
     const [marketplaceListings, setMarketplaceListings] = useState([])
     const [availableClaims, setAvailableClaims] = useState([])
+    const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false)
+    const [transactionUrl, setTransactionUrl] = useState(null)
 
     const [isTransactionLoading, setIsTransactionLoading] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -209,6 +211,19 @@ const AppProvider = (({children}) => {
             console.error("Error in getAvailableInsuranceClaims: ", error);
             throw error;
         }
+    }
+
+    const loadEventPageData = async (contractAddress) => {
+        // get the mint limit
+        const contract = await tronWeb.contract().at(contractAddress)
+        const mintLimit = await contract.mintLimitPerAddress().call()
+        const decimalLimit = tronWeb.toDecimal(mintLimit._hex)
+        // get the event cancelled
+        const isCancelled = await contract.eventCanceled().call()
+        // get sale start time
+        const saleTime = await contract.saleStartTime().call()
+
+        return {mintLimit: decimalLimit, isCancelled, startTime: saleTime}
     }
 
     // READ FUNCTIONS (MARKETPLACE CONTRACT)
@@ -430,9 +445,9 @@ const AppProvider = (({children}) => {
     return(
         <AppContext.Provider value={{
             tronWeb, 
-            adapter, readyState, account, network, isTransactionLoading, myTickets, marketplaceListings, isLoading, availableClaims,
-            setReadyState, setAccount, setNetwork, setIsTransactionLoading, setMyTickets, setMarketplaceListings, setIsLoading, setAvailableClaims,
-            getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens, getAllActiveListings, isEventCanceled, getAvailableInsuranceClaims, getSaleStartTime,
+            adapter, readyState, account, network, isTransactionLoading, myTickets, marketplaceListings, isLoading, availableClaims, isConfirmationModalOpen, transactionUrl,
+            setReadyState, setAccount, setNetwork, setIsTransactionLoading, setMyTickets, setMarketplaceListings, setIsLoading, setAvailableClaims, setIsConfirmationModalOpen, setTransactionUrl, 
+            getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens, getAllActiveListings, isEventCanceled, getAvailableInsuranceClaims, getSaleStartTime, loadEventPageData,
             mintTicket, buyInsurance, redeemTicket, listTicket, updateTicketStatus, approveNFTContractToMarketplace, buyTicket, claimInsurance,
             decodeHexString, isTronLinkConnected
         }}>

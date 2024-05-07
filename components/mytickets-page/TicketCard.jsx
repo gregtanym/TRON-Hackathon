@@ -7,9 +7,10 @@ import { useGlobalContext } from '@/app/Context/store';
 import TransactionLoading from '../TransactionLoading';
 import ListTicketModal from './ListTicketModal';
 import RedeemTicketModal from './RedeemTicketModal';
+import ConfirmationModal from '../ConfirmationModal';
 
 const TicketCard = ({contractAddress, eventId, title, date, time, location, tokenId, isRedeemed, isInsured, catClass, imageURL, isCancelled, originalTicketPrice, isListed}) => {
-    const {isTransactionLoading, setIsTransactionLoading, buyInsurance, isTronLinkConnected, redeemTicket, decodeHexString, setMyTickets, updateTicketStatus} = useGlobalContext()
+    const {isTransactionLoading, setIsTransactionLoading, buyInsurance, isTronLinkConnected, redeemTicket, decodeHexString, setMyTickets, setIsConfirmationModalOpen, isConfirmationModalOpen, transactionUrl, setTransactionUrl, account, getAllOwnedTokens} = useGlobalContext()
     const [isListPopupOpen, setIsListPopupOpen] = useState(false); 
     const [isRedeemPopupOpen, setIsRedeemPopupOpen] = useState(false); 
 
@@ -23,13 +24,14 @@ const TicketCard = ({contractAddress, eventId, title, date, time, location, toke
         }
     
         try {
-          const {success, error} = await buyInsurance(contractAddress, tokenId, originalTicketPrice)
+          const {success, error, result} = await buyInsurance(contractAddress, tokenId, originalTicketPrice)
     
           if (!success){
             throw new Error(decodeHexString(error.output.contractResult[0]))
           }
-          updateTicketStatus(tokenId, {isInsured: true})
-          alert("Purchase of ticket insurance successful!")
+          getAllOwnedTokens(account)
+          setTransactionUrl(`https://nile.tronscan.org/#/transaction/${result}`)
+          setIsConfirmationModalOpen(true)
         } catch (err) {
           alert(`Error during transaction: ${err.message}`);
         } finally {
@@ -44,6 +46,11 @@ const TicketCard = ({contractAddress, eventId, title, date, time, location, toke
 
   return (
     <div className='border-b-2 border-black mx-8 my-2 py-2 flex flex-row w-full'>
+      <ConfirmationModal 
+        isOpen={isConfirmationModalOpen}
+        onClose={() => setIsConfirmationModalOpen(false)}
+        url={transactionUrl}
+      />
       {isListPopupOpen && 
         <ListTicketModal 
           tokenId={tokenId}

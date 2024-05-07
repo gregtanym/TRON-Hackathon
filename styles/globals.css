@@ -124,3 +124,52 @@ label {
   overflow-y: auto;
 }
 
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* High z-index to ensure it's on top of other content */
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px; /* Soften the edges */
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* subtle shadow for depth */
+  position: relative; /* For absolute positioning of the close button */
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px; /* Adjust size as needed */
+  color: #333; /* Color for the close icon */
+}
+
+.modal-content a {
+  word-wrap: break-word;
+  display: block; /* Ensures the link is on its own line and takes full width */
+  margin-top: 10px;
+  background-color: #f0f0f0; /* Light background for the link */
+  padding: 8px; /* Padding to make the link easier to click */
+  border-radius: 4px; /* Rounded corners for the link */
+  text-align: center; /* Center-align the link text */
+  color: #0056b3; /* Link color */
+  text-decoration: none; /* Remove underline */
+}
+
+.modal-content a:hover {
+  background-color: #e0e0e0; /* Hover effect for link */
+}

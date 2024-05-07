@@ -12,10 +12,14 @@ import { useGlobalContext } from "@/app/Context/store";
 import { FaRegThumbsUp } from "react-icons/fa";
 import { FaRegThumbsDown } from "react-icons/fa";
 import TransactionLoading from "@/components/TransactionLoading";
+import ConfirmationModal from "@/components/ConfirmationModal";
+import Loading from "@/components/Loading";
 
 const EventPurchase = ({ params }) => {
 
-  const {decodeHexString, isTransactionLoading, setIsTransactionLoading, mintTicket, isTronLinkConnected, getCatPrices, getMintLimit, isEventCanceled, getSaleStartTime} = useGlobalContext()
+  const {decodeHexString, isTransactionLoading, setIsTransactionLoading, mintTicket, isTronLinkConnected, 
+    getCatPrices, getMintLimit, isEventCanceled, getSaleStartTime, setIsConfirmationModalOpen, isConfirmationModalOpen, 
+    transactionUrl, setTransactionUrl, isLoading, setIsLoading, loadEventPageData} = useGlobalContext()
 
 
   const [selectedCategory, setSelectedCategory] = useState(1) // actual cat index is different from the selected categoryyyyy
@@ -27,28 +31,36 @@ const EventPurchase = ({ params }) => {
   const event = eventData.find(event => event.eventId === eventId)
   
   useEffect(() => {
-    const getMintLimitPerAddress = async () => {
-      const mintLimt = await getMintLimit(event.contractAddress)
-      setEventMintLimit(mintLimt)
-    }
-    const eventIsCancelled = async () => {
-      const isCancelled = await isEventCanceled(event.contractAddress)
-      setIsCancelled(isCancelled)
-    }
-    const getSaleTime = async () => {
-      const startTime = await getSaleStartTime(event.contractAddress)
-      const date = new Date(startTime * 1000)
-      const optionsDate = { day: 'numeric', month: 'short', year: 'numeric' };
-      const formattedDate = date.toLocaleDateString('en-US', optionsDate).toUpperCase(); 
-
-      const optionsTime = { hour: 'numeric', minute: '2-digit', hour12: true };
-      const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
-      setSaleStartTime(`${formattedTime} ${formattedDate}`)
-    }
-
-    getMintLimitPerAddress()
-    eventIsCancelled()
-    getSaleTime()
+    const loadData = async () => {
+      setIsLoading(true); // Start loading before all async requests
+  
+      try {
+        // Using Promise.all to wait for all data fetching before proceeding
+        const {mintLimit, isCancelled, startTime} = await loadEventPageData(event.contractAddress)
+  
+        // Process mint limit
+        setEventMintLimit(mintLimit);
+  
+        // Process cancellation status
+        setIsCancelled(isCancelled);
+  
+        // Process and format sale start time
+        const date = new Date(startTime * 1000);
+        const optionsDate = { day: 'numeric', month: 'short', year: 'numeric' };
+        const formattedDate = date.toLocaleDateString('en-US', optionsDate).toUpperCase();
+  
+        const optionsTime = { hour: 'numeric', minute: '2-digit', hour12: true };
+        const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
+        setSaleStartTime(`${formattedTime} ${formattedDate}`);
+  
+      } catch (error) {
+        console.error('Error fetching event details:', error);
+      } finally {
+        setIsLoading(false); // End loading after all operations are complete
+      }
+    };
+  
+    loadData();
   }, []);
 
   const incrementCat = () => {
@@ -80,13 +92,14 @@ const EventPurchase = ({ params }) => {
     console.log("current state information: ", selectedCatIndex, selectedQuantity)
     try {
       const ticketPrice = await getCatPrices(selectedCatIndex, event.contractAddress)
-      const {success, error} = await mintTicket(selectedCatIndex, selectedQuantity, ticketPrice, event.contractAddress)
+      const {success, error, result} = await mintTicket(selectedCatIndex, selectedQuantity, ticketPrice, event.contractAddress)
 
       if (!success){
         throw new Error(decodeHexString(error.output.contractResult[0]))
       }
 
-      alert("Minting of NFT ticket successful!")
+      setTransactionUrl(`https://nile.tronscan.org/#/transaction/${result}`)
+      setIsConfirmationModalOpen(true)
     } catch (err) {
       alert(`Error during transaction: ${err.message}`);
     } finally {
@@ -96,6 +109,12 @@ const EventPurchase = ({ params }) => {
   
   return (
     <div className="h-full w-full flex flex-col items-center justify-start py-10 pb-20 bg-gray-200">
+      {isLoading && <Loading/>}
+      <ConfirmationModal 
+        isOpen={isConfirmationModalOpen}
+        onClose={() => setIsConfirmationModalOpen(false)}
+        url={transactionUrl}
+      />
       {isTransactionLoading && <TransactionLoading/>}
       <div className="max-w-1/2 flex flex-col items-center justify-center bg-white rounded-md p-7 shadow-lg">
         <img src={event.eventImg} className="h-[400px] w-[800px] rounded-md"/>

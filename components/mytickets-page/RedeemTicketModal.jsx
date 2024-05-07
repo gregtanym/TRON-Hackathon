@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { IoClose } from "react-icons/io5"; 
 import { useGlobalContext } from '@/app/Context/store';
-import { useRouter } from 'next/navigation';
 
 const RedeemTicketModal = ({ tokenId, contractAddress, onClose }) => {
     const {setIsTransactionLoading, isTronLinkConnected, decodeHexString, getAllOwnedTokens, account, redeemTicket} = useGlobalContext()
     const [userEmail, setUserEmail] = useState()
     const [isChecked, setIsChecked] = useState(false)
-
-    const router = useRouter()
 
     // Function to stop click propagation
     const handleModalClick = (event) => {
