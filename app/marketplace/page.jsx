@@ -40,7 +40,7 @@ const Marketplace = () => {
 
     return (
       <section className="w-full flex-center flex-col h-full pb-20">
-        {isLoading && <Loading/>}
+        {/* {isLoading && <Loading/>} */}
           <div className='w-full bg-gray-800 flex flex-col items-center pt-6'>
             <HomeSearchBar/>
             <div className='self-end my-5 mx-8'>

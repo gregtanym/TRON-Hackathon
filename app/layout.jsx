@@ -1,4 +1,3 @@
-// "use client"
 
 import "@/styles/globals.css";
 import Nav from "@/components/Nav";
@@ -36,13 +35,13 @@ const RootLayout = ({ children }) => {
     <html lang="en">
       <body className="">
         {/* <WalletProvider adapters={adapters} onAccountsChanged={onAccountsChanged}> */}
-        <AppProvider>
-          <div className="main">
-            <Nav/>
-            {children}
-            <Chat/>
-          </div>
-        </AppProvider>
+          <AppProvider>
+            <div className="main">
+              <Nav/>
+              {children}
+              <Chat/>
+            </div>
+          </AppProvider>
         {/* </WalletProvider> */}
       </body>
     </html>

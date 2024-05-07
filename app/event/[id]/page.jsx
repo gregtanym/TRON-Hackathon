@@ -14,12 +14,13 @@ import { FaRegThumbsDown } from "react-icons/fa";
 import TransactionLoading from "@/components/TransactionLoading";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import Loading from "@/components/Loading";
+import { useQueryClient } from "react-query";
 
 const EventPurchase = ({ params }) => {
 
   const {decodeHexString, isTransactionLoading, setIsTransactionLoading, mintTicket, isTronLinkConnected, 
     getCatPrices, getMintLimit, isEventCanceled, getSaleStartTime, setIsConfirmationModalOpen, isConfirmationModalOpen, 
-    transactionUrl, setTransactionUrl, isLoading, setIsLoading, loadEventPageData} = useGlobalContext()
+    transactionUrl, setTransactionUrl, isLoading, setIsLoading, loadEventPageData, account} = useGlobalContext()
 
 
   const [selectedCategory, setSelectedCategory] = useState(1) // actual cat index is different from the selected categoryyyyy
@@ -29,6 +30,7 @@ const EventPurchase = ({ params }) => {
   const [saleStartTime, setSaleStartTime] = useState(null);
   const eventId = params.id
   const event = eventData.find(event => event.eventId === eventId)
+  const queryClient = useQueryClient()
   
   useEffect(() => {
     const loadData = async () => {
@@ -97,7 +99,7 @@ const EventPurchase = ({ params }) => {
       if (!success){
         throw new Error(decodeHexString(error.output.contractResult[0]))
       }
-
+      queryClient.invalidateQueries(['tickets', account])
       setTransactionUrl(`https://nile.tronscan.org/#/transaction/${result}`)
       setIsConfirmationModalOpen(true)
     } catch (err) {

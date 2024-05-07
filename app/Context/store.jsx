@@ -2,10 +2,12 @@
 import React, { useContext, useEffect, useState, useRef, useMemo } from "react"
 import { TronLinkAdapter, WalletReadyState } from '@tronweb3/tronwallet-adapters';
 import eventData from '../../data/events.json'
+import { QueryClient, QueryClientProvider } from "react-query";
 // import { TronWeb } from "@/tronweb"; // this imports the tronweb library from tronweb.js (not in node_modules)
 const TronWeb = require('../../tronweb')
 
 const AppContext = React.createContext()
+const queryClient = new QueryClient() 
 
 const AppProvider = (({children}) => {
     const [readyState, setReadyState] = useState();
@@ -109,6 +111,7 @@ const AppProvider = (({children}) => {
             }));
             // Now update the state once with all new tickets
             setMyTickets(allNewTickets);
+            return allNewTickets
         } catch (error) {
             console.error("Error in getAllOwnedTokens: ", error);
             throw error;
@@ -443,16 +446,18 @@ const AppProvider = (({children}) => {
     };
 
     return(
-        <AppContext.Provider value={{
-            tronWeb, 
-            adapter, readyState, account, network, isTransactionLoading, myTickets, marketplaceListings, isLoading, availableClaims, isConfirmationModalOpen, transactionUrl,
-            setReadyState, setAccount, setNetwork, setIsTransactionLoading, setMyTickets, setMarketplaceListings, setIsLoading, setAvailableClaims, setIsConfirmationModalOpen, setTransactionUrl, 
-            getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens, getAllActiveListings, isEventCanceled, getAvailableInsuranceClaims, getSaleStartTime, loadEventPageData,
-            mintTicket, buyInsurance, redeemTicket, listTicket, updateTicketStatus, approveNFTContractToMarketplace, buyTicket, claimInsurance,
-            decodeHexString, isTronLinkConnected
-        }}>
-            {children}
-        </AppContext.Provider>
+        <QueryClientProvider client={queryClient}>
+            <AppContext.Provider value={{
+                tronWeb, 
+                adapter, readyState, account, network, isTransactionLoading, myTickets, marketplaceListings, isLoading, availableClaims, isConfirmationModalOpen, transactionUrl,
+                setReadyState, setAccount, setNetwork, setIsTransactionLoading, setMyTickets, setMarketplaceListings, setIsLoading, setAvailableClaims, setIsConfirmationModalOpen, setTransactionUrl, 
+                getOwnedTokenIds, getCatPrices, getMintLimit, getAllOwnedTokens, getAllActiveListings, isEventCanceled, getAvailableInsuranceClaims, getSaleStartTime, loadEventPageData,
+                mintTicket, buyInsurance, redeemTicket, listTicket, updateTicketStatus, approveNFTContractToMarketplace, buyTicket, claimInsurance,
+                decodeHexString, isTronLinkConnected
+            }}>
+                {children}
+            </AppContext.Provider>
+        </QueryClientProvider>
     )
 })
 

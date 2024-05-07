@@ -9,12 +9,14 @@ import { useGlobalContext } from '@/app/Context/store';
 import { FaRegThumbsUp } from "react-icons/fa";
 import { FaRegThumbsDown } from "react-icons/fa";
 import ConfirmationModal from '../ConfirmationModal';
+import { useQueryClient } from 'react-query';
 
 const ListingModal = ({ isOpen, listing, onClose }) => {
-  const {buyTicket, isTronLinkConnected, setIsTransactionLoading, decodeHexString, setIsConfirmationModalOpen, isConfirmationModalOpen, transactionUrl, setTransactionUrl} = useGlobalContext()
+  const {buyTicket, isTronLinkConnected, setIsTransactionLoading, decodeHexString, setIsConfirmationModalOpen, isConfirmationModalOpen, transactionUrl, setTransactionUrl, account} = useGlobalContext()
   if (!isOpen) return null;
 
   console.log(listing)
+  const queryClient = useQueryClient()
 
   const handleModalClick = (event) => {
     event.stopPropagation();
@@ -34,6 +36,7 @@ const ListingModal = ({ isOpen, listing, onClose }) => {
       if (!success){
         throw new Error(decodeHexString(error.output.contractResult[0]))
       }
+      queryClient.invalidateQueries(['tickets', account])
       setTransactionUrl(`https://nile.tronscan.org/#/transaction/${result}`)
       setIsConfirmationModalOpen(true)
     } catch (err) {

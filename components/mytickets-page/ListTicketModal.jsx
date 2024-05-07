@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { IoClose } from "react-icons/io5"; 
 import { useGlobalContext } from '@/app/Context/store';
 import ConfirmationModal from '../ConfirmationModal';
+import { useQueryClient } from 'react-query';
 
 const ListTicketModal = ({ tokenId, contractAddress, onClose }) => {
     const {listTicket, setIsTransactionLoading, updateTicketStatus, isTronLinkConnected, decodeHexString, approveNFTContractToMarketplace, getAllOwnedTokens, account, setIsConfirmationModalOpen, isConfirmationModalOpen, transactionUrl, setTransactionUrl} = useGlobalContext()
     const [listedTRXPrice, setListedTRXPrice] = useState()
-
+    const queryClient = useQueryClient()
 
     // Function to stop click propagation
     const handleModalClick = (event) => {
@@ -32,15 +33,18 @@ const ListTicketModal = ({ tokenId, contractAddress, onClose }) => {
           if (!success){
             throw new Error(decodeHexString(error.output.contractResult[0]))
           }
-          getAllOwnedTokens(account)
+          // getAllOwnedTokens(account)
+          queryClient.invalidateQueries(['tickets', account])
           setTransactionUrl(`https://nile.tronscan.org/#/transaction/${result}`)
           setIsConfirmationModalOpen(true)
-          onClose()
+          setTimeout(() => {
+            setIsTransactionLoading(false);
+            onClose();
+          }, 10000);
         } catch (err) {
           alert(`Error during transaction: ${err.message}`);
-        } finally {
           setIsTransactionLoading(false)
-        }
+        } 
     }
 
     const handleMarketplaceApproval = async () => {

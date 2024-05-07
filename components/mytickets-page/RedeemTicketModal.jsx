@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { IoClose } from "react-icons/io5"; 
 import { useGlobalContext } from '@/app/Context/store';
+import { useQueryClient } from 'react-query';
 
 const RedeemTicketModal = ({ tokenId, contractAddress, onClose }) => {
     const {setIsTransactionLoading, isTronLinkConnected, decodeHexString, getAllOwnedTokens, account, redeemTicket} = useGlobalContext()
     const [userEmail, setUserEmail] = useState()
     const [isChecked, setIsChecked] = useState(false)
+    const queryClient = useQueryClient()
 
     // Function to stop click propagation
     const handleModalClick = (event) => {
@@ -45,12 +47,15 @@ const RedeemTicketModal = ({ tokenId, contractAddress, onClose }) => {
             )
             const result = await response.json();
             if (!response.ok) throw new Error(result.message);
-            alert('Ticket redeemed! Check your email for details.')
-            getAllOwnedTokens(account)
-            onClose()
+            queryClient.invalidateQueries(['tickets', account])
+            alert('Ticket redeemed! Check your email for details.');
+        
+            setTimeout(() => {
+                setIsTransactionLoading(false);
+                onClose();
+            }, 10000);
         } catch (error) {
             alert(`Error getting image: ${error.message}`);
-        } finally {
             setIsTransactionLoading(false)
         }
     }

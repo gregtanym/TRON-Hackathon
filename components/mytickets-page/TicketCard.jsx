@@ -8,12 +8,13 @@ import TransactionLoading from '../TransactionLoading';
 import ListTicketModal from './ListTicketModal';
 import RedeemTicketModal from './RedeemTicketModal';
 import ConfirmationModal from '../ConfirmationModal';
+import { useQueryClient } from 'react-query';
 
 const TicketCard = ({contractAddress, eventId, title, date, time, location, tokenId, isRedeemed, isInsured, catClass, imageURL, isCancelled, originalTicketPrice, isListed}) => {
     const {isTransactionLoading, setIsTransactionLoading, buyInsurance, isTronLinkConnected, redeemTicket, decodeHexString, setMyTickets, setIsConfirmationModalOpen, isConfirmationModalOpen, transactionUrl, setTransactionUrl, account, getAllOwnedTokens} = useGlobalContext()
     const [isListPopupOpen, setIsListPopupOpen] = useState(false); 
     const [isRedeemPopupOpen, setIsRedeemPopupOpen] = useState(false); 
-
+    const queryClient = useQueryClient()
 
     const handleBuyInsurance = async () => {
         setIsTransactionLoading(true)
@@ -29,12 +30,15 @@ const TicketCard = ({contractAddress, eventId, title, date, time, location, toke
           if (!success){
             throw new Error(decodeHexString(error.output.contractResult[0]))
           }
-          getAllOwnedTokens(account)
+          // getAllOwnedTokens(account)
+          queryClient.invalidateQueries(['tickets', account])
+          setTimeout(() => {
+            setIsTransactionLoading(false);
+          }, 10000);
           setTransactionUrl(`https://nile.tronscan.org/#/transaction/${result}`)
           setIsConfirmationModalOpen(true)
         } catch (err) {
           alert(`Error during transaction: ${err.message}`);
-        } finally {
           setIsTransactionLoading(false)
         }
     }
