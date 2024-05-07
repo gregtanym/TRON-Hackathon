@@ -154,27 +154,27 @@ const AppProvider = (({children}) => {
         return await contract.eventCanceled().call()
     }
 
-    const getAvailableInsuranceClaims =  async (userAddress) => {
+    const getAvailableInsuranceClaims = async (userAddress) => {
         try {
-            setAvailableClaims([])
-            let allNewClaims = []; 
-
-            const marketplaceContract = await tronWeb.contract().at(process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS)
+            setAvailableClaims([]);
+            let allNewClaims = [];
     
-            // Wait for all promises from map to resolve
-            await Promise.all(eventData.map(async (event) => {
+            const marketplaceContract = await tronWeb.contract().at(process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS);
+    
+            // Use for...of instead of map for better handling of asynchronous operations
+            for (let event of eventData) {
                 console.log(event.eventTitle, event.contractAddress);
                 const currentContractAddress = event.contractAddress;
                 const contract = await tronWeb.contract().at(currentContractAddress);
-
+    
+                // Check if the event is cancelled and proceed only if true
                 if (!await contract.eventCanceled().call()) {
-                    // continue
+                    continue; // Skip to the next iteration if the event is not canceled
                 }
-
+    
                 const insuredTokenIds = await contract.getInsuredTokenIds(userAddress).call();
                 console.log(event.eventTitle, "Claims found: ", insuredTokenIds);
     
-                // Temporary array for this contract
                 let tempClaims = [];
                 for (let i = 0; i < insuredTokenIds.length; i++) {
                     const currentTokenId = tronWeb.toDecimal(insuredTokenIds[i]._hex);
@@ -182,33 +182,30 @@ const AppProvider = (({children}) => {
                     const catIndex = await contract.determineCategoryId(currentTokenId).call();
                     const catClass = tronWeb.toDecimal(catIndex) + 1;
                     const isCancelled = true;
-                    // const isRedeemed = await contract.isTicketRedeemed(currentTokenId).call();
-
-                    const originalTicketPrice = Number(tronWeb.toSun(event.catPricing[catIndex])) // returns string
-                    const insurancePaid = 20/100 * originalTicketPrice
-                    const refundAmount = tronWeb.fromSun(originalTicketPrice + insurancePaid)
+    
+                    const originalTicketPrice = Number(tronWeb.toSun(event.catPricing[catIndex])); // returns string
+                    const insurancePaid = (20 / 100) * originalTicketPrice;
+                    const refundAmount = tronWeb.fromSun(originalTicketPrice + insurancePaid);
     
                     const newClaim = {
-                        "contractAddress": currentContractAddress, 
+                        "contractAddress": currentContractAddress,
                         "eventId": event.eventId,
                         "eventTitle": event.eventTitle,
                         "date": event.date,
-                        "time": event.time, 
-                        "location": event.location, 
+                        "time": event.time,
+                        "location": event.location,
                         "tokenId": currentTokenId,
                         "isInsured": isInsured,
                         "catClass": catClass,
                         "isCancelled": isCancelled,
                         "refundAmount": refundAmount
-                        // "originalTicketPrice": tronWeb.toSun(event.catPricing[catIndex]),
-                        // "isRedeemed": isRedeemed,
                     };
     
                     tempClaims.push(newClaim);
                 }
     
                 allNewClaims = allNewClaims.concat(tempClaims);
-            }));
+            }
             setAvailableClaims(allNewClaims);
         } catch (error) {
             console.error("Error in getAvailableInsuranceClaims: ", error);
@@ -236,7 +233,7 @@ const AppProvider = (({children}) => {
         try {
             const contractAddress = process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS;
             const contract = await tronWeb.contract().at(contractAddress);
-            const allActiveListingsTmp = await contract.getAllActiveListings2().call();
+            const allActiveListingsTmp = await contract.getAllActiveListings().call();
 
     
             const [ids, sellers, contracts, tokenIds, listingPrices, actives] = allActiveListingsTmp;

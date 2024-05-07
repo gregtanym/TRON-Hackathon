@@ -81,7 +81,7 @@ const Insurance = () => {
               </tr>
             </thead>
             <tbody>
-              {sampleClaims.map((claim) => 
+              {availableClaims.map((claim) => 
                 <tr className="bg-white border-b border-black">
                   <td className="px-6 py-4">{claim.eventTitle}</td>
                   <td className="px-6 py-4">{claim.tokenId}</td>
