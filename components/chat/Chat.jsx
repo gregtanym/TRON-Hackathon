@@ -54,7 +54,7 @@ export default function Chat() {
                 - Optional insurance covers cancellations; refunds portion of ticket price.
                 - NFT smart contract triggers event cancellation and manages refunds.
                 
-                AR/VR Concert Experience:
+                VR Concert Experience:
                 - Offers virtual attendance; utilizes 360° livestreaming.
                 - Provides VR-compatible experience for remote users.
                 
