@@ -118,7 +118,7 @@ const Nav = () => {
                     : "text-gray-300 hover:text-white"
                 } h-full`}
               >
-                VR Experience
+                VR Experience (Beta)
               </li>
             </Link>
           </ul>
