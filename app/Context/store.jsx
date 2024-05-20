@@ -1,10 +1,12 @@
 "use client"
+import dynamic from 'next/dynamic'
 import React, { useContext, useEffect, useState, useRef, useMemo } from "react"
 import { TronLinkAdapter, WalletReadyState } from '@tronweb3/tronwallet-adapters';
 import eventData from '../../data/events.json'
 import { QueryClient, QueryClientProvider } from "react-query";
 // import { TronWeb } from "@/tronweb"; // this imports the tronweb library from tronweb.js (not in node_modules)
-const TronWeb = require('../../tronweb')
+// const TronWeb = require('../../tronweb')
+// const TronWeb = dynamic(()=> import('../../tronweb'), {ssr:false})
 
 const AppContext = React.createContext()
 const queryClient = new QueryClient() 
@@ -23,18 +25,20 @@ const AppProvider = (({children}) => {
     const [isTransactionLoading, setIsTransactionLoading] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
 
-    const HttpProvider = TronWeb.providers.HttpProvider;
-    const fullNode = new HttpProvider("https://nile.trongrid.io");
-    const solidityNode = new HttpProvider("https://nile.trongrid.io");
-    const eventServer = new HttpProvider("https://nile.trongrid.io");
-    const privateKey = process.env.NEXT_PUBLIC_TRONLINK_PRIV_KEY; // seems like im only able to make transactions with the wallet this priv key belongs to?
-    // window.tronWeb = new TronWeb(fullNode,solidityNode,eventServer, privateKey);
-    const tronWeb = window.tronWeb
-    // tronWeb.setHeader({"TRON-PRO-API-KEY": process.env.NEXT_PUBLIC_TRONGRID_API_KEY});
+    const [tronWeb, setTronWeb] = useState(null);
+
+    useEffect(() => {
+        if (typeof window !== "undefined" && window.tronWeb) {
+          setTronWeb(window.tronWeb);
+        }
+      }, []);
 
     // READ FUNCTIONS (NFT CONTRACT)
 
     const getOwnedTokenIds = async (ownerAddress, contractAddress) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         const contract = await tronWeb.contract().at(contractAddress)
         const ownedTokens = await contract.getOwnedTokenIds(ownerAddress).call()
         console.log("this is owned tokens: ", ownedTokens)
@@ -42,6 +46,9 @@ const AppProvider = (({children}) => {
     }
 
     const getCatPrices = async (categoryId, contractAddress) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         const contract = await tronWeb.contract().at(contractAddress)
         const ticketPrice = await contract.categoryPrices(categoryId).call()
         const decimalPrice = tronWeb.toDecimal(ticketPrice._hex)
@@ -51,6 +58,9 @@ const AppProvider = (({children}) => {
     }
 
     const getMintLimit = async (contractAddress) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         const contract = await tronWeb.contract().at(contractAddress)
         const mintLimit = await contract.mintLimitPerAddress().call()
         const decimalLimit = tronWeb.toDecimal(mintLimit._hex)
@@ -59,6 +69,9 @@ const AppProvider = (({children}) => {
 
     // function to get all the owned tokens across all event contracts
     const getAllOwnedTokens = async (userAddress) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         try {
             console.log("getAllOwnedTokens called: ", userAddress);
             setMyTickets([])
@@ -144,17 +157,26 @@ const AppProvider = (({children}) => {
     }
 
     const getSaleStartTime = async (contractAddress) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         const contract = await tronWeb.contract().at(contractAddress)
         const time = await contract.saleStartTime().call()
         return time
     }
 
     const isEventCanceled = async (contractAddress) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         const contract = await tronWeb.contract().at(contractAddress)
         return await contract.eventCanceled().call()
     }
 
     const getAvailableInsuranceClaims = async (userAddress) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         try {
             setAvailableClaims([]);
             let allNewClaims = [];
@@ -214,6 +236,9 @@ const AppProvider = (({children}) => {
     }
 
     const loadEventPageData = async (contractAddress) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         // get the mint limit
         const contract = await tronWeb.contract().at(contractAddress)
         const mintLimit = await contract.mintLimitPerAddress().call()
@@ -229,6 +254,9 @@ const AppProvider = (({children}) => {
     // READ FUNCTIONS (MARKETPLACE CONTRACT)
 
     const getAllActiveListings = async () => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         console.log("getAllActiveListings called!");
         try {
             const contractAddress = process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS;
@@ -300,6 +328,9 @@ const AppProvider = (({children}) => {
     // WRITE FUNCTIONS (NFT CONTRACT)
 
     const mintTicket = async (categoryId, quantity, fee, contractAddress) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         try {
             const contract = await tronWeb.contract().at(contractAddress)
             const result = await contract.mintTicket(categoryId, quantity).send({
@@ -316,6 +347,9 @@ const AppProvider = (({children}) => {
     }
 
     const buyInsurance = async (contractAddress, tokenId, originalTicketPrice) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         try {
             const contract = await tronWeb.contract().at(contractAddress)
             const insurancePrice = Number(originalTicketPrice) * 20/100
@@ -333,6 +367,9 @@ const AppProvider = (({children}) => {
     }
 
     const redeemTicket = async (contractAddress, tokenId) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         try {
             const contract = await tronWeb.contract().at(contractAddress)
             const result = await contract.redeemTicket(tokenId).send({
@@ -349,6 +386,9 @@ const AppProvider = (({children}) => {
     }
 
     const claimInsurance = async (contractAddress, tokenId) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         try {
             const contract = await tronWeb.contract().at(contractAddress)
             const result = await contract.claimRefund(tokenId).send({
@@ -367,6 +407,9 @@ const AppProvider = (({children}) => {
     // WRITE FUNCTIONS (MARKETPLACE CONTRACT)
 
     const listTicket = async (contractAddress, tokenId, listedTRXPrice) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         const listedSunPrice = tronWeb.toSun(listedTRXPrice)
         try {
             const contract = await tronWeb.contract().at(process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS)
@@ -384,6 +427,9 @@ const AppProvider = (({children}) => {
     }
 
     const buyTicket = async (listingId, listedPrice) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         try {
             const contract = await tronWeb.contract().at(process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS)
             const result = await contract.buyNFT(listingId).send({
@@ -399,6 +445,9 @@ const AppProvider = (({children}) => {
     }
 
     const approveNFTContractToMarketplace = async (contractAddress, tokenId) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         try {
             const contract = await tronWeb.contract().at(contractAddress)
             const result = await contract.approve(process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT_ADDRESS, tokenId).send({
@@ -417,6 +466,9 @@ const AppProvider = (({children}) => {
     // UTILITY FUNCTIONS
 
     const isTronLinkConnected = async () => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         console.log("tronweb connection: ", await tronWeb.isConnected())
 
         if (tronWeb) {
@@ -428,6 +480,9 @@ const AppProvider = (({children}) => {
     }
 
     const decodeHexString = (hexString) => {
+        if (!tronWeb) {
+            throw new Error("tronWeb is not initialized");
+        }
         const data = hexString.slice(8); // Remove the function selector
         const decodedString = tronWeb.toUtf8(data);
         const strippedString = decodedString.replace(/[\u0000-\u001F]+/g, ''); // Remove null padding
